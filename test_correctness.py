@@ -1,8 +1,15 @@
+import logging
+
 from deepeval import assert_test
 from deepeval.metrics import GEval
 from deepeval.test_case import LLMTestCase, SingleTurnParams
 
+import pytest
 
+logger = logging.getLogger(__name__)
+
+
+@pytest.mark.static
 def test_correctness(gemini_model, test_data_loader):
     test_data = test_data_loader("correctness.json")
     correctness_metric = GEval(

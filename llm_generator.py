@@ -5,8 +5,12 @@ Generates dynamic LLM responses that can be evaluated against expected outputs.
 Uses Gemini API to generate responses to questions.
 """
 
+import logging
+
 from google import genai
 from google.genai import types
+
+logger = logging.getLogger(__name__)
 
 
 def generate_response(question: str, api_key: str, model: str = "gemini-3.5-flash-lite") -> str:
@@ -21,6 +25,9 @@ def generate_response(question: str, api_key: str, model: str = "gemini-3.5-flas
     Returns:
         Generated response text
     """
+    logger.debug(f"Generating response using model: {model}")
+    logger.debug(f"Question: {question}")
+    
     client = genai.Client(api_key=api_key)
     resp = client.models.generate_content(
         model=model,
@@ -29,7 +36,10 @@ def generate_response(question: str, api_key: str, model: str = "gemini-3.5-flas
             max_output_tokens=400,
         ),
     )
-    return resp.text.strip()
+    
+    result = resp.text.strip()
+    logger.debug(f"Generated response (length: {len(result)} chars)")
+    return result
 
 
 def generate_conversation_turn(
@@ -50,6 +60,11 @@ def generate_conversation_turn(
     Returns:
         Generated assistant response
     """
+    logger.debug(f"Generating conversation turn using model: {model}")
+    logger.debug(f"User message: {user_message}")
+    if conversation_history:
+        logger.debug(f"Conversation history: {len(conversation_history)} turns")
+    
     client = genai.Client(api_key=api_key)
     
     # Build message history
@@ -78,4 +93,7 @@ def generate_conversation_turn(
             max_output_tokens=300,
         ),
     )
-    return resp.text.strip()
+    
+    result = resp.text.strip()
+    logger.debug(f"Generated conversation turn (length: {len(result)} chars)")
+    return result
