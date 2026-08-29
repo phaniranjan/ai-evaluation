@@ -1,0 +1,28 @@
+{
+  "turns": [
+    {
+      "role": "user",
+      "content": "What is DeepEval?"
+    },
+    {
+      "role": "assistant",
+      "content": "DeepEval is an open-source LLM eval package."
+    },
+    {
+      "role": "user",
+      "content": "What can I use it for?"
+    },
+    {
+      "role": "assistant",
+      "content": "You can use DeepEval to evaluate LLM outputs with metrics such as correctness, relevance, and safety."
+    },
+    {
+      "role": "user",
+      "content": "How do I get started?"
+    },
+    {
+      "role": "assistant",
+      "content": "Install it with pip, define a test case and metric, then run your tests with pytest."
+    }
+  ]
+}
