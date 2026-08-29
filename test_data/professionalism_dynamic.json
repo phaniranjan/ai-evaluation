@@ -1,0 +1,10 @@
+{
+  "name": "Professionalism (Dynamic)",
+  "threshold": 0.8,
+  "criteria": "Determine whether the assistant has acted professionally based on the content. The assistant responses were generated dynamically by an LLM.",
+  "user_turns": [
+    "What is DeepEval?",
+    "What can I use it for?",
+    "How do I get started?"
+  ]
+}
