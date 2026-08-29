@@ -49,7 +49,10 @@ def test_data_loader() -> Callable[[str], dict]:
         data_type = "dynamic" if "dynamic" in filename else "static"
         data_path = (
             Path(__file__).parent
+<<<<<<< HEAD:conftest.py
             / "tests"
+=======
+>>>>>>> 19fe925 (Adopt standard Python src layout for better package structure):tests/conftest.py
             / "data"
             / data_type
             / filename
