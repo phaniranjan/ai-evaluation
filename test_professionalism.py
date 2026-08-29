@@ -6,11 +6,11 @@ from deepeval.test_case import ConversationalTestCase, MultiTurnParams, Turn
 def test_professionalism(gemini_model, test_data_loader):
     test_data = test_data_loader("professionalism.json")
     professionalism_metric = ConversationalGEval(
-        name="Professionalism",
-        criteria="Determine whether the assistant has acted professionally based on the content.",
+        name=test_data["name"],
+        criteria=test_data["criteria"],
         evaluation_params=[MultiTurnParams.CONTENT, MultiTurnParams.ROLE],
         model=gemini_model,
-        threshold=0.9,
+        threshold=test_data["threshold"],
     )
     test_case = ConversationalTestCase(
         turns=[Turn(**turn) for turn in test_data["turns"]]

@@ -6,11 +6,11 @@ from deepeval.test_case import LLMTestCase, SingleTurnParams
 def test_correctness(gemini_model, test_data_loader):
     test_data = test_data_loader("correctness.json")
     correctness_metric = GEval(
-        name="Correctness",
-        criteria="Determine if the 'actual output' is correct based on the 'expected output'.",
+        name=test_data["name"],
+        criteria=test_data["criteria"],
         evaluation_params=[SingleTurnParams.ACTUAL_OUTPUT, SingleTurnParams.EXPECTED_OUTPUT],
         model=gemini_model,
-        threshold=0.9,
+        threshold=test_data["threshold"],
     )
     test_case = LLMTestCase(
         input=test_data["input"],
