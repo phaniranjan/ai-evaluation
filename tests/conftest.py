@@ -7,7 +7,7 @@ from typing import Callable
 
 import pytest
 
-from deepeval.models import OllamaModel
+from deepeval.models import GeminiModel, OllamaModel
 from ai_evaluation.llm_generator import generate_response, generate_conversation_turn
 
 
@@ -32,6 +32,16 @@ def _configure_logging():
 
 _configure_logging()
 logger = logging.getLogger(__name__)
+
+
+@pytest.fixture(scope="session")
+def gemini_model():
+    """Provide the Gemini model retained for generation and Gemini-specific tests."""
+    logger.info("Initializing Gemini model")
+    return GeminiModel(
+        model="gemini-3.5-flash-lite",
+        api_key=os.environ["GEMINI_API_KEY"],
+    )
 
 
 @pytest.fixture(scope="session")
