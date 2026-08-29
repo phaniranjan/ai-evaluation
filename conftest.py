@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from pathlib import Path
 from typing import Callable
@@ -9,8 +10,26 @@ from deepeval.models import GeminiModel
 from llm_generator import generate_response, generate_conversation_turn
 
 
+# Configure logging
+def _configure_logging():
+    """Configure logging for tests."""
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.StreamHandler(),
+            logging.FileHandler("test_execution.log"),
+        ],
+    )
+
+
+_configure_logging()
+logger = logging.getLogger(__name__)
+
+
 @pytest.fixture(scope="session")
 def gemini_model():
+    logger.info("Initializing Gemini model")
     return GeminiModel(
         model="gemini-3.5-flash-lite",
         api_key=os.environ["GEMINI_API_KEY"],

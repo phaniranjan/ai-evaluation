@@ -1,8 +1,15 @@
+import logging
+
 from deepeval import assert_test
 from deepeval.metrics import ConversationalGEval
 from deepeval.test_case import ConversationalTestCase, MultiTurnParams, Turn
 
+import pytest
 
+logger = logging.getLogger(__name__)
+
+
+@pytest.mark.static
 def test_professionalism(gemini_model, test_data_loader):
     test_data = test_data_loader("professionalism.json")
     professionalism_metric = ConversationalGEval(

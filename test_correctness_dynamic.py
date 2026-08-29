@@ -1,8 +1,15 @@
+import logging
+
 from deepeval import assert_test
 from deepeval.metrics import GEval
 from deepeval.test_case import LLMTestCase, SingleTurnParams
 
+import pytest
 
+logger = logging.getLogger(__name__)
+
+
+@pytest.mark.dynamic
 def test_correctness_dynamic(gemini_model, test_data_loader, response_generator):
     """
     Test correctness with dynamically generated LLM response.
@@ -13,13 +20,15 @@ def test_correctness_dynamic(gemini_model, test_data_loader, response_generator)
     """
     test_data = test_data_loader("correctness_dynamic.json")
     
+    logger.info("Starting correctness dynamic test")
+    logger.info(f"Input: {test_data['input']}")
+    
     # Generate the actual output using LLM
+    logger.info("Generating LLM response...")
     actual_output = response_generator(test_data["input"])
     
-    print(f"\n=== Correctness (Dynamic) Test ===")
-    print(f"Input: {test_data['input']}")
-    print(f"\nGenerated Output:\n{actual_output}")
-    print(f"\nExpected Output:\n{test_data['expected_output']}")
+    logger.info(f"Generated Output:\n{actual_output}")
+    logger.info(f"Expected Output:\n{test_data['expected_output']}")
     
     correctness_metric = GEval(
         name=test_data["name"],
@@ -35,4 +44,6 @@ def test_correctness_dynamic(gemini_model, test_data_loader, response_generator)
         expected_output=test_data["expected_output"],
     )
     
+    logger.info(f"Threshold for evaluation: {test_data['threshold']}")
     assert_test(test_case, [correctness_metric])
+    logger.info("Correctness dynamic test passed!")
