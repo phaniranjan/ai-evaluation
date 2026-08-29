@@ -50,6 +50,7 @@ DeepEval does not allow `LLMTestCase` and `ConversationalTestCase` to be evaluat
 ## Project Files
 
 - `conftest.py` - Shared session-scoped Gemini model fixture.
+- `test_data/` - JSON data used by the evaluation tests.
 - `test_correctness.py` - Evaluates a single LLM response against an expected response using `GEval`.
 - `test_professionalism.py` - Evaluates a multi-turn conversation using `ConversationalGEval`.
 - `requirements.txt` - Python dependencies.
