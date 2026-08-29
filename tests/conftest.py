@@ -49,6 +49,7 @@ def test_data_loader() -> Callable[[str], dict]:
         data_type = "dynamic" if "dynamic" in filename else "static"
         data_path = (
             Path(__file__).parent
+            / "tests"
             / "data"
             / data_type
             / filename
