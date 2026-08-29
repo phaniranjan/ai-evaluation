@@ -7,7 +7,7 @@ from typing import Callable
 import pytest
 
 from deepeval.models import GeminiModel
-from llm_generator import generate_response, generate_conversation_turn
+from src.llm_generator import generate_response, generate_conversation_turn
 
 
 # Configure logging
@@ -45,7 +45,15 @@ def api_key():
 @pytest.fixture
 def test_data_loader() -> Callable[[str], dict]:
     def load_test_data(filename: str) -> dict:
-        data_path = Path(__file__).parent / "test_data" / filename
+        # Determine if this is dynamic or static data based on filename
+        data_type = "dynamic" if "dynamic" in filename else "static"
+        data_path = (
+            Path(__file__).parent
+            / "tests"
+            / "data"
+            / data_type
+            / filename
+        )
         with data_path.open(encoding="utf-8") as file:
             return json.load(file)
 
