@@ -10,13 +10,13 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.static
-def test_correctness(gemini_model, test_data_loader):
+def test_correctness(ollama_judge_model, test_data_loader):
     test_data = test_data_loader("correctness.json")
     correctness_metric = GEval(
         name=test_data["name"],
         criteria=test_data["criteria"],
         evaluation_params=[SingleTurnParams.ACTUAL_OUTPUT, SingleTurnParams.EXPECTED_OUTPUT],
-        model=gemini_model,
+        model=ollama_judge_model,
         threshold=test_data["threshold"],
     )
     test_case = LLMTestCase(

@@ -90,7 +90,7 @@ def generate_conversation_turn(
         model=model,
         contents=messages,
         config=types.GenerateContentConfig(
-            max_output_tokens=300,
+            max_output_tokens=400,
         ),
     )
     
