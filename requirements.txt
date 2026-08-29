@@ -1,3 +1,4 @@
 deepeval
 google-genai
+ollama
 pytest>=7.0

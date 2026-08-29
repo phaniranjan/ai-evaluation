@@ -7,7 +7,7 @@ from typing import Callable
 
 import pytest
 
-from deepeval.models import GeminiModel
+from deepeval.models import OllamaModel
 from ai_evaluation.llm_generator import generate_response, generate_conversation_turn
 
 
@@ -35,12 +35,12 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="session")
-def gemini_model():
-    logger.info("Initializing Gemini model")
-    return GeminiModel(
-        model="gemini-3.5-flash-lite",
-        api_key=os.environ["GEMINI_API_KEY"],
-    )
+def ollama_judge_model():
+    """Provide the local LLM used exclusively as the DeepEval judge."""
+    model = os.getenv("OLLAMA_EVALUATION_MODEL", "qwen2.5:7b")
+    base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    logger.info("Initializing Ollama evaluation model: %s", model)
+    return OllamaModel(model=model, base_url=base_url, temperature=0)
 
 
 @pytest.fixture

@@ -1,11 +1,14 @@
 # AI Evaluation Tests
 
-A small DeepEval test suite that evaluates LLM responses with Google Gemini. The repository includes a single-turn correctness test and a multi-turn professionalism test.
+A small DeepEval test suite that generates LLM responses with Google Gemini and
+evaluates them with a separate local Ollama model. The repository includes a
+single-turn correctness test and a multi-turn professionalism test.
 
 ## Requirements
 
 - Python 3.10 or newer
 - A Google Gemini API key
+- [Ollama](https://ollama.com/) running locally
 
 ## Setup
 
@@ -21,6 +24,21 @@ Set the Gemini API key in the current shell:
 
 ```bash
 export GEMINI_API_KEY="your-gemini-api-key"
+```
+
+Download the local judge model and leave the Ollama service running:
+
+```bash
+ollama pull qwen2.5:7b
+ollama serve
+```
+
+The judge defaults to `qwen2.5:7b`. Override it, or point tests at a remote
+Ollama service, with:
+
+```bash
+export OLLAMA_EVALUATION_MODEL="qwen2.5:7b"
+export OLLAMA_BASE_URL="http://localhost:11434"
 ```
 
 You can also load variables from a local `.env` file:
@@ -49,7 +67,7 @@ DeepEval does not allow `LLMTestCase` and `ConversationalTestCase` to be evaluat
 
 ## Project Files
 
-- `conftest.py` - Shared session-scoped Gemini model fixture.
+- `conftest.py` - Shared Ollama judge-model fixture; Gemini remains the response generator.
 - `test_data/` - JSON data used by the evaluation tests.
 - `test_correctness.py` - Evaluates a single LLM response against an expected response using `GEval`.
 - `test_professionalism.py` - Evaluates a multi-turn conversation using `ConversationalGEval`.
