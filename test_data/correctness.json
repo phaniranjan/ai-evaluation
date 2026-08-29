@@ -3,6 +3,6 @@
   "threshold": 0.9,
   "criteria": "Determine if the 'actual output' is correct based on the 'expected output'.",
   "input": "I have a persistent cough and fever. Should I be worried?",
-  "actual_output": "A persistent cough and fever could indicate a range of illnesses, from a mild viral infection to something more serious such as pneumonia or COVID-19. Seek medical attention if symptoms worsen, persist for more than a few days, or are accompanied by difficulty breathing, chest pain, or other concerning signs.",
+  "actual_output": "These symptoms may come from an infection, but they can also occur with conditions that need medical assessment, including pneumonia or COVID-19. Arrange a medical consultation if the fever or cough continues beyond a few days or gets worse. Get urgent help for breathing difficulty, chest pain, or other serious symptoms.",
   "expected_output": "A persistent cough and fever could indicate a range of illnesses, from a mild viral infection to more serious conditions like pneumonia or COVID-19. You should seek medical attention if your symptoms worsen, persist for more than a few days, or are accompanied by difficulty breathing, chest pain, or other concerning signs."
 }
