@@ -1,6 +1,6 @@
 {
   "name": "Professionalism",
-  "threshold": 0.9,
+  "threshold": 0.7,
   "criteria": "Determine whether the assistant has acted professionally based on the content.",
   "turns": [
     {
