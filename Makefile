@@ -23,7 +23,7 @@ format:
 	isort .
 
 lint:
-	pylint src/ tests/ 
+	pylint src/ tests/ conftest.py
 	mypy --ignore-missing-imports .
 
 test:
