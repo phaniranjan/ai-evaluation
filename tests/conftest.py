@@ -1,24 +1,31 @@
 import json
 import logging
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import Callable
 
 import pytest
 
 from deepeval.models import GeminiModel
-from src.llm_generator import generate_response, generate_conversation_turn
+from ai_evaluation.llm_generator import generate_response, generate_conversation_turn
 
 
 # Configure logging
 def _configure_logging():
     """Configure logging for tests."""
+    log_dir = Path("logs")
+    log_dir.mkdir(exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = log_dir / f"test_execution_{timestamp}.log"
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         handlers=[
             logging.StreamHandler(),
-            logging.FileHandler("test_execution.log"),
+            logging.FileHandler(log_file, encoding="utf-8"),
         ],
     )
 
@@ -49,7 +56,6 @@ def test_data_loader() -> Callable[[str], dict]:
         data_type = "dynamic" if "dynamic" in filename else "static"
         data_path = (
             Path(__file__).parent
-            / "tests"
             / "data"
             / data_type
             / filename

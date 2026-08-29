@@ -30,10 +30,10 @@ test:
 	pytest -v
 
 test-dynamic:
-	pytest -v -m dynamic test_correctness_dynamic.py test_professionalism_dynamic.py
+	pytest -v -m dynamic tests/dynamic/
 
 test-static:
-	pytest -v -m static test_correctness.py test_professionalism.py
+	pytest -v -m static tests/static/
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
