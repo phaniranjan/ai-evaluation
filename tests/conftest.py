@@ -8,7 +8,7 @@ from typing import Callable
 import pytest
 
 from deepeval.models import GeminiModel, OllamaModel
-from ai_evaluation.llm_generator import generate_response, generate_conversation_turn
+from ai_evaluation.llm_generator import LLMGenerator
 
 
 # Configure logging
@@ -77,13 +77,19 @@ def test_data_loader() -> Callable[[str], dict]:
 
 
 @pytest.fixture
-def response_generator(api_key):
-    """Fixture for generating LLM responses."""
-    return lambda question: generate_response(question, api_key)
+def llm_generator(api_key):
+    """Provide a configured Gemini response generator."""
+    return LLMGenerator(api_key)
 
 
 @pytest.fixture
-def conversation_generator(api_key):
+def response_generator(llm_generator):
+    """Fixture for generating LLM responses."""
+    return llm_generator.generate_response
+
+
+@pytest.fixture
+def conversation_generator(llm_generator):
     """Fixture for generating multi-turn conversations."""
     def generate_conversation(initial_prompt: str, turns: list) -> list:
         """
@@ -105,7 +111,11 @@ def conversation_generator(api_key):
             history.append({"role": "user", "content": user_msg})
             
             # Generate assistant response
-            assistant_response = generate_conversation_turn(user_msg, api_key, conversation_history=history)
+            assistant_response = llm_generator.generate_conversation_turn(
+                user_msg,
+                conversation_history=history[:-1],
+                system_instruction=initial_prompt,
+            )
             conversation.append({"role": "assistant", "content": assistant_response})
             history.append({"role": "assistant", "content": assistant_response})
         
