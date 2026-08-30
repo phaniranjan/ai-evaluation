@@ -7,7 +7,7 @@ from typing import Callable
 
 import pytest
 
-from deepeval.models import GeminiModel, OllamaModel
+from deepeval.models import GeminiModel, GrokModel, OllamaModel
 from ai_evaluation.llm_generator import LLMGenerator
 
 
@@ -51,6 +51,31 @@ def ollama_judge_model():
     base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     logger.info("Initializing Ollama evaluation model: %s", model)
     return OllamaModel(model=model, base_url=base_url, temperature=0)
+
+
+@pytest.fixture(scope="session")
+def grok_judge_model():
+    """Provide Grok as the cloud-based DeepEval judge."""
+    model = os.getenv("GROK_EVALUATION_MODEL", "grok-4.1")
+    logger.info("Initializing Grok evaluation model: %s", model)
+    return GrokModel(model=model, api_key=os.environ["GROK_API_KEY"], temperature=0)
+
+
+@pytest.fixture(scope="session")
+def judge_model(request):
+    """Provide the configured DeepEval judge (Ollama by default, or Grok)."""
+    provider = os.getenv("EVALUATION_JUDGE", "ollama").lower()
+    fixtures = {
+        "ollama": "ollama_judge_model",
+        "grok": "grok_judge_model",
+    }
+    try:
+        return request.getfixturevalue(fixtures[provider])
+    except KeyError as error:
+        valid_providers = ", ".join(sorted(fixtures))
+        raise pytest.UsageError(
+            "EVALUATION_JUDGE must be one of: {}".format(valid_providers)
+        ) from error
 
 
 @pytest.fixture

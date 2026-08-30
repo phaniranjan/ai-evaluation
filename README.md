@@ -1,14 +1,15 @@
 # AI Evaluation Tests
 
 A small DeepEval test suite that generates LLM responses with Google Gemini and
-evaluates them with a separate local Ollama model. The repository includes a
+evaluates them with a separate judge model. Ollama is the default judge, and
+xAI Grok is available as a cloud-based alternative. The repository includes a
 single-turn correctness test and a multi-turn professionalism test.
 
 ## Requirements
 
 - Python 3.10 or newer
 - A Google Gemini API key
-- [Ollama](https://ollama.com/) running locally
+- Either [Ollama](https://ollama.com/) running locally, or an xAI API key for Grok
 
 ## Setup
 
@@ -40,6 +41,19 @@ Ollama service, with:
 export OLLAMA_EVALUATION_MODEL="qwen2.5:7b"
 export OLLAMA_BASE_URL="http://localhost:11434"
 ```
+
+### Use Grok as the judge
+
+Set the xAI API key and select Grok before running the tests:
+
+```bash
+export GROK_API_KEY="your-xai-api-key"
+export EVALUATION_JUDGE="grok"
+export GROK_EVALUATION_MODEL="grok-4.1"
+```
+
+`EVALUATION_JUDGE` defaults to `ollama`, so no changes are required for the
+existing local setup. Set it to `grok` to use the Grok judge instead.
 
 You can also load variables from a local `.env` file:
 
