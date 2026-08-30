@@ -10,8 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.static
-def test_correctness(judge_model, test_data_loader):
-    test_data = test_data_loader("correctness.json")
 def test_single_turn(judge_model, test_data_loader):
     test_data = test_data_loader("single_turn.json")
     correctness_metric = GEval(

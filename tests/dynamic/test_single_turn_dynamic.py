@@ -10,10 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.dynamic
-def test_correctness_dynamic(judge_model, test_data_loader, response_generator):
 def test_single_turn_dynamic(judge_model, test_data_loader, response_generator):
     """
-    Test correctness and relevance with dynamically generated LLM response.
     Test correctness and relevance with dynamically generated LLM response for single-turn Q&A.
     
     This test:
@@ -21,10 +19,8 @@ def test_single_turn_dynamic(judge_model, test_data_loader, response_generator):
     2. Compares it against expected output for correctness (GEval)
     3. Evaluates answer relevancy against input prompt (AnswerRelevancyMetric)
     """
-    test_data = test_data_loader("correctness_dynamic.json")
     test_data = test_data_loader("single_turn_dynamic.json")
     
-    logger.info("Starting correctness dynamic test")
     logger.info("Starting single-turn dynamic test")
     logger.info(f"Input: {test_data['input']}")
     
@@ -60,5 +56,4 @@ def test_single_turn_dynamic(judge_model, test_data_loader, response_generator):
     
     logger.info(f"Threshold for evaluation: {test_data['threshold']}")
     assert_test(test_case, [correctness_metric, relevancy_metric])
-    logger.info("Correctness dynamic test passed!")
     logger.info("Single-turn dynamic test passed!")
