@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.static
-def test_professionalism(judge_model, test_data_loader):
-    test_data = test_data_loader("professionalism.json")
+def test_multi_turn(judge_model, test_data_loader):
+    test_data = test_data_loader("multi_turn.json")
     professionalism_metric = ConversationalGEval(
         name=test_data["name"],
         criteria=test_data["criteria"],

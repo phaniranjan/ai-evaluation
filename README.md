@@ -65,25 +65,27 @@ Keep `.env` and `.env.local` out of Git. They are ignored by `.gitignore`.
 
 ## Run Tests
 
-Run the single-turn correctness test:
+Run the single-turn response quality tests (evaluating correctness and answer relevancy):
 
 ```bash
-./deepeval_venv/bin/pytest -q test_correctness.py
+./deepeval_venv/bin/pytest -q tests/static/test_single_turn.py
+./deepeval_venv/bin/pytest -q tests/dynamic/test_single_turn_dynamic.py
 ```
 
-Run the conversational professionalism test:
+Run the multi-turn conversational quality tests:
 
 ```bash
-./deepeval_venv/bin/pytest -q test_professionalism.py
+./deepeval_venv/bin/pytest -q tests/static/test_multi_turn.py
+./deepeval_venv/bin/pytest -q tests/dynamic/test_multi_turn_dynamic.py
 ```
 
 DeepEval does not allow `LLMTestCase` and `ConversationalTestCase` to be evaluated in the same test run, so run these modules as separate pytest commands.
 
 ## Project Files
 
-- `conftest.py` - Shared judge-model fixture (Ollama or Groq Llama); Gemini remains the response generator.
+- `conftest.py` - Shared judge-model fixture (Ollama or Groq); Gemini remains the response generator.
 - `test_data/` - JSON data used by the evaluation tests.
-- `test_correctness.py` - Evaluates a single LLM response against an expected response using `GEval`.
-- `test_professionalism.py` - Evaluates a multi-turn conversation using `ConversationalGEval`.
+- `test_single_turn.py` / `test_single_turn_dynamic.py` - Evaluates single-turn LLM responses against expected responses for correctness (`GEval`) and answer relevancy (`AnswerRelevancyMetric`).
+- `test_multi_turn.py` / `test_multi_turn_dynamic.py` - Evaluates multi-turn conversations using `ConversationalGEval`.
 - `requirements.txt` - Python dependencies.
 - `.gitignore` - Excludes environment files, virtual environments, and test caches.
