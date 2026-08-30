@@ -5,9 +5,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable
 
+from dotenv import load_dotenv
 import pytest
 
+load_dotenv()
+
 from deepeval.models import GeminiModel, OllamaModel
+
+from ai_evaluation.groq_model import GroqModel
 from ai_evaluation.llm_generator import LLMGenerator
 
 
@@ -51,6 +56,35 @@ def ollama_judge_model():
     base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     logger.info("Initializing Ollama evaluation model: %s", model)
     return OllamaModel(model=model, base_url=base_url, temperature=0)
+
+
+@pytest.fixture(scope="session")
+def groq_judge_model():
+    """Provide Groq-hosted model as the cloud-based DeepEval judge."""
+    model = os.getenv("GROQ_EVALUATION_MODEL", "qwen/qwen3.6-27b")
+    logger.info("Initializing Groq evaluation model: %s", model)
+    return GroqModel(
+        model=model,
+        api_key=os.environ["GROQ_API_KEY"],
+        temperature=0,
+    )
+
+
+@pytest.fixture(scope="session")
+def judge_model(request):
+    """Provide the configured DeepEval judge (Ollama by default, or Groq)."""
+    provider = os.getenv("EVALUATION_JUDGE", "ollama").lower()
+    fixtures = {
+        "ollama": "ollama_judge_model",
+        "groq": "groq_judge_model",
+    }
+    try:
+        return request.getfixturevalue(fixtures[provider])
+    except KeyError as error:
+        valid_providers = ", ".join(sorted(fixtures))
+        raise pytest.UsageError(
+            "EVALUATION_JUDGE must be one of: {}".format(valid_providers)
+        ) from error
 
 
 @pytest.fixture

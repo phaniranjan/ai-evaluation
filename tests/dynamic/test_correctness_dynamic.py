@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.dynamic
-def test_correctness_dynamic(ollama_judge_model, test_data_loader, response_generator):
+def test_correctness_dynamic(judge_model, test_data_loader, response_generator):
     """
     Test correctness with dynamically generated LLM response.
     
@@ -25,7 +25,11 @@ def test_correctness_dynamic(ollama_judge_model, test_data_loader, response_gene
     
     # Generate the actual output using LLM
     logger.info("Generating LLM response...")
-    actual_output = response_generator(test_data["input"])
+    system_instruction = test_data.get(
+        "system_instruction",
+        "Provide a concise, direct, and factual answer in a clear paragraph without conversational filler, disclaimers, or follow-up questions.",
+    )
+    actual_output = response_generator(test_data["input"], system_instruction=system_instruction)
     
     logger.info(f"Generated Output:\n{actual_output}")
     logger.info(f"Expected Output:\n{test_data['expected_output']}")
@@ -34,7 +38,7 @@ def test_correctness_dynamic(ollama_judge_model, test_data_loader, response_gene
         name=test_data["name"],
         criteria=test_data["criteria"],
         evaluation_params=[SingleTurnParams.ACTUAL_OUTPUT, SingleTurnParams.EXPECTED_OUTPUT],
-        model=ollama_judge_model,
+        model=judge_model,
         threshold=test_data["threshold"],
     )
     

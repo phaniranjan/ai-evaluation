@@ -1,14 +1,15 @@
 # AI Evaluation Tests
 
 A small DeepEval test suite that generates LLM responses with Google Gemini and
-evaluates them with a separate local Ollama model. The repository includes a
-single-turn correctness test and a multi-turn professionalism test.
+evaluates them with a separate judge model. Ollama is the default judge, and
+Groq-hosted Llama is available as a cloud-based alternative. The repository
+includes a single-turn correctness test and a multi-turn professionalism test.
 
 ## Requirements
 
 - Python 3.10 or newer
 - A Google Gemini API key
-- [Ollama](https://ollama.com/) running locally
+- Either [Ollama](https://ollama.com/) running locally, or a [Groq](https://groq.com/) API key for Llama
 
 ## Setup
 
@@ -41,6 +42,19 @@ export OLLAMA_EVALUATION_MODEL="qwen2.5:7b"
 export OLLAMA_BASE_URL="http://localhost:11434"
 ```
 
+### Use Groq Llama as the judge
+
+Set the Groq API key and select Groq before running the tests:
+
+```bash
+export GROQ_API_KEY="your-groq-api-key"
+export EVALUATION_JUDGE="groq"
+export GROQ_EVALUATION_MODEL="qwen/qwen3.6-27b"
+```
+
+`EVALUATION_JUDGE` defaults to `ollama`, so no changes are required for the
+existing local setup. Set it to `groq` to use Llama 3.3 70B on Groq instead.
+
 You can also load variables from a local `.env` file:
 
 ```bash
@@ -67,7 +81,7 @@ DeepEval does not allow `LLMTestCase` and `ConversationalTestCase` to be evaluat
 
 ## Project Files
 
-- `conftest.py` - Shared Ollama judge-model fixture; Gemini remains the response generator.
+- `conftest.py` - Shared judge-model fixture (Ollama or Groq Llama); Gemini remains the response generator.
 - `test_data/` - JSON data used by the evaluation tests.
 - `test_correctness.py` - Evaluates a single LLM response against an expected response using `GEval`.
 - `test_professionalism.py` - Evaluates a multi-turn conversation using `ConversationalGEval`.

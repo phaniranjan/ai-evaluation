@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.dynamic
 def test_professionalism_dynamic(
-    ollama_judge_model, test_data_loader, conversation_generator
+    judge_model, test_data_loader, conversation_generator
 ):
     """
     Test professionalism with dynamically generated LLM conversation.
@@ -40,7 +40,7 @@ def test_professionalism_dynamic(
         name=test_data["name"],
         criteria=test_data["criteria"],
         evaluation_params=[MultiTurnParams.CONTENT, MultiTurnParams.ROLE],
-        model=ollama_judge_model,
+        model=judge_model,
         threshold=test_data["threshold"],
     )
     
