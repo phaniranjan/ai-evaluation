@@ -16,17 +16,19 @@ class LLMGenerator:
         self,
         api_key: str,
         model: str = "gemini-3.5-flash-lite",
-        max_output_tokens: int = 400,
+        max_output_tokens: int = 2048,
     ) -> None:
         self.client = genai.Client(api_key=api_key)
         self.model = model
         self.max_output_tokens = max_output_tokens
 
-    def generate_response(self, question: str) -> str:
+    def generate_response(
+        self, question: str, system_instruction: Optional[str] = None
+    ) -> str:
         """Generate a response to a standalone question."""
         logger.debug("Generating response using model: %s", self.model)
         logger.debug("Question: %s", question)
-        return self._generate(question)
+        return self._generate(question, system_instruction=system_instruction)
 
     def generate_conversation_turn(
         self,
