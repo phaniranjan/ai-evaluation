@@ -1,7 +1,7 @@
 import logging
 
 from deepeval import assert_test
-from deepeval.metrics import GEval
+from deepeval.metrics import AnswerRelevancyMetric, GEval
 from deepeval.test_case import LLMTestCase, SingleTurnParams
 
 import pytest
@@ -12,11 +12,12 @@ logger = logging.getLogger(__name__)
 @pytest.mark.dynamic
 def test_correctness_dynamic(judge_model, test_data_loader, response_generator):
     """
-    Test correctness with dynamically generated LLM response.
+    Test correctness and relevance with dynamically generated LLM response.
     
     This test:
     1. Generates an LLM response to the input question
-    2. Compares it against an expected output using GEval (LLM-as-judge)
+    2. Compares it against expected output for correctness (GEval)
+    3. Evaluates answer relevancy against input prompt (AnswerRelevancyMetric)
     """
     test_data = test_data_loader("correctness_dynamic.json")
     
@@ -41,6 +42,11 @@ def test_correctness_dynamic(judge_model, test_data_loader, response_generator):
         model=judge_model,
         threshold=test_data["threshold"],
     )
+
+    relevancy_metric = AnswerRelevancyMetric(
+        threshold=test_data.get("relevancy_threshold", 0.7),
+        model=judge_model,
+    )
     
     test_case = LLMTestCase(
         input=test_data["input"],
@@ -49,5 +55,5 @@ def test_correctness_dynamic(judge_model, test_data_loader, response_generator):
     )
     
     logger.info(f"Threshold for evaluation: {test_data['threshold']}")
-    assert_test(test_case, [correctness_metric])
+    assert_test(test_case, [correctness_metric, relevancy_metric])
     logger.info("Correctness dynamic test passed!")
