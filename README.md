@@ -79,13 +79,21 @@ Run the multi-turn conversational quality tests:
 ./deepeval_venv/bin/pytest -q tests/dynamic/test_multi_turn_dynamic.py
 ```
 
+Run the summarization evaluation tests:
+
+```bash
+./deepeval_venv/bin/pytest -q tests/static/test_summarization.py
+./deepeval_venv/bin/pytest -q tests/dynamic/test_summarization_dynamic.py
+```
+
 DeepEval does not allow `LLMTestCase` and `ConversationalTestCase` to be evaluated in the same test run, so run these modules as separate pytest commands.
 
 ## Project Files
 
 - `conftest.py` - Shared judge-model fixture (Ollama or Groq); Gemini remains the response generator.
 - `test_data/` - JSON data used by the evaluation tests.
-- `test_single_turn.py` / `test_single_turn_dynamic.py` - Evaluates single-turn LLM responses against expected responses for correctness (`GEval`) and answer relevancy (`AnswerRelevancyMetric`).
+- `test_single_turn.py` / `test_single_turn_dynamic.py` - Evaluates single-turn LLM responses for correctness (`GEval`), answer relevancy (`AnswerRelevancyMetric`), bias (`BiasMetric`), and toxicity (`ToxicityMetric`).
 - `test_multi_turn.py` / `test_multi_turn_dynamic.py` - Evaluates multi-turn conversations using `ConversationalGEval`.
+- `test_summarization.py` / `test_summarization_dynamic.py` - Evaluates document summaries for keypoint alignment and truthfulness using `SummarizationMetric`.
 - `requirements.txt` - Python dependencies.
 - `.gitignore` - Excludes environment files, virtual environments, and test caches.

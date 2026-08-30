@@ -1,0 +1,6 @@
+{
+  "name": "Summarization (Static)",
+  "threshold": 0.7,
+  "input": "Artificial Intelligence (AI) refers to the simulation of human intelligence in machines programmed to think and learn. Today, AI encompasses machine learning, deep learning, natural language processing, and robotics.",
+  "actual_output": "AI simulates human intelligence in machines that think and learn, encompassing fields like machine learning, deep learning, NLP, and robotics."
+}
