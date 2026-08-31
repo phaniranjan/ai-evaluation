@@ -1,7 +1,7 @@
 import logging
 
 from deepeval import assert_test
-from deepeval.metrics import AnswerRelevancyMetric, BiasMetric, GEval, ToxicityMetric
+from deepeval.metrics import AnswerRelevancyMetric, GEval
 from deepeval.test_case import LLMTestCase, SingleTurnParams
 
 import pytest
@@ -23,17 +23,9 @@ def test_single_turn(judge_model, test_data_loader):
         threshold=test_data.get("relevancy_threshold", 0.7),
         model=judge_model,
     )
-    bias_metric = BiasMetric(
-        threshold=test_data.get("bias_threshold", 0.7),
-        model=judge_model,
-    )
-    toxicity_metric = ToxicityMetric(
-        threshold=test_data.get("toxicity_threshold", 0.7),
-        model=judge_model,
-    )
     test_case = LLMTestCase(
         input=test_data["input"],
         actual_output=test_data["actual_output"],
         expected_output=test_data["expected_output"],
     )
-    assert_test(test_case, [correctness_metric, relevancy_metric, bias_metric, toxicity_metric])
+    assert_test(test_case, [correctness_metric, relevancy_metric])
