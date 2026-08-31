@@ -1,0 +1,63 @@
+[
+  {
+    "id": "art_jwst_2026",
+    "title": "JWST Detects Carbon-Bearing Molecules in Atmosphere of Exoplanet K2-18b",
+    "source": "Astrophysical Journal Letters",
+    "published_date": "2026-02-15",
+    "chunks": [
+      {
+        "chunk_id": "jwst_c1",
+        "text": "NASA's James Webb Space Telescope (JWST) has detected carbon-bearing molecules, including methane and carbon dioxide, in the atmosphere of exoplanet K2-18b. K2-18b is a sub-Neptune exoplanet orbiting the cool dwarf star K2-18 in its habitable zone, located approximately 120 light-years from Earth in the constellation Leo."
+      },
+      {
+        "chunk_id": "jwst_c2",
+        "text": "The spectral analysis revealed an abundance of methane and carbon dioxide alongside a scarcity of ammonia. This chemical atmospheric composition supports the hypothesis that K2-18b may possess a hydrogen-rich atmosphere above a water ocean world, classified by astronomers as a Hycean exoplanet."
+      },
+      {
+        "chunk_id": "jwst_c3",
+        "text": "Observations were conducted using JWST's Near-Infrared Spectrograph (NIRSpec) and Near-Infrared Imager and Slitless Spectrograph (NIRISS). Scientists noted potential trace signals of dimethyl sulfide (DMS), a molecule primarily produced by living phytoplankton on Earth, though further confirmation is required through follow-up spectroscopic observations."
+      }
+    ]
+  },
+  {
+    "id": "art_solar_2026",
+    "title": "Perovskite-Silicon Tandem Solar Cell Achieves World Record 34.6% Efficiency",
+    "source": "Renewable Energy Tech Review",
+    "published_date": "2026-03-01",
+    "chunks": [
+      {
+        "chunk_id": "solar_c1",
+        "text": "Researchers at the Helmholtz-Zentrum Berlin have developed a novel perovskite-silicon tandem solar cell that achieved a certified power conversion efficiency of 34.6% in laboratory tests, setting a new world record for commercial-scale silicon tandem photovoltaic devices."
+      },
+      {
+        "chunk_id": "solar_c2",
+        "text": "The breakthrough relies on a self-assembled monolayer of custom organic molecules engineered to minimize charge carrier recombination at the interface between the perovskite absorber layer and the top electrode, significantly boosting open-circuit voltage to 1.98 volts."
+      },
+      {
+        "chunk_id": "solar_c3",
+        "text": "Accelerated environmental stability testing demonstrated that the encapsulated tandem cell retained 95% of its initial power output after 1,200 hours of continuous operational exposure under intense Simulated Solar Light at 65 degrees Celsius."
+      }
+    ]
+  },
+  {
+    "id": "art_mrna_2026",
+    "title": "Targeted mRNA Cancer Vaccine Shows Promising Results in Phase 2 Clinical Trial",
+    "source": "Journal of Clinical Oncology",
+    "published_date": "2026-01-20",
+    "chunks": [
+      {
+        "chunk_id": "mrna_c1",
+        "text": "A personalized mRNA cancer vaccine, mRNA-4157, combined with pembrolizumab reduced the risk of tumor recurrence or death by 44% compared to pembrolizumab alone in patients with resected high-risk stage III/IV melanoma, according to Phase 2 trial data."
+      },
+      {
+        "chunk_id": "mrna_c2",
+        "text": "The therapy functions by analyzing the unique mutational signature of a patient's excised tumor sample to identify up to 34 neoantigens. Synthetic mRNA encoding these specific neoantigens is then formulated into lipid nanoparticles to prime T-cell immune responses against residual cancer cells."
+      },
+      {
+        "chunk_id": "mrna_c3",
+        "text": "Patients received up to nine doses of the individualized mRNA vaccine administered intramuscularly every three weeks over a total treatment course of approximately nine months. Mild to moderate injection site soreness and low-grade fever were the most common adverse events reported."
+      }
+    ]
+  }
+]
+
