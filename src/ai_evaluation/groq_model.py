@@ -18,7 +18,7 @@ class GroqModel(DeepEvalBaseLLM):
 
     def __init__(
         self,
-        model: str = "qwen/qwen3.6-27b",
+        model: str = "qwen/qwen3.8-27b",
         api_key: Optional[str] = None,
         temperature: float = 0.0,
         max_tokens: int = 4096,
@@ -51,6 +51,8 @@ class GroqModel(DeepEvalBaseLLM):
         }
         if schema is not None:
             request["response_format"] = {"type": "json_object"}
+            if "json" not in prompt.lower():
+                request["messages"] = [{"role": "user", "content": f"{prompt}\n\nPlease respond in valid JSON."}]
 
         from groq import APIStatusError, RateLimitError
 
@@ -63,7 +65,7 @@ class GroqModel(DeepEvalBaseLLM):
                 is_429 = getattr(exc, "status_code", None) == 429 or isinstance(exc, RateLimitError)
                 if not is_429 or attempt == max_attempts - 1:
                     raise
-                wait_seconds = (2 ** attempt) + 1
+                wait_seconds = 5 * (attempt + 1)
                 logger.warning(
                     "Groq rate limit hit (429). Retrying in %d seconds (attempt %d/%d)...",
                     wait_seconds,

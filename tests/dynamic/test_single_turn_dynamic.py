@@ -12,11 +12,11 @@ logger = logging.getLogger(__name__)
 @pytest.mark.dynamic
 def test_single_turn_dynamic(judge_model, test_data_loader, response_generator):
     """
-    Test correctness and relevance with dynamically generated LLM response for single-turn Q&A.
+    Test correctness and relevance for dynamically generated single-turn Q&A.
     
     This test:
     1. Generates an LLM response to the input question
-    2. Compares it against expected output for correctness (GEval)
+    2. Evaluates correctness against expected output (GEval)
     3. Evaluates answer relevancy against input prompt (AnswerRelevancyMetric)
     """
     test_data = test_data_loader("single_turn_dynamic.json")
