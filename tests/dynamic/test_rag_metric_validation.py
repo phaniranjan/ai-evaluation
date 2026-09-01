@@ -2,9 +2,9 @@
 
 import logging
 
+import pytest
 from deepeval.metrics import AnswerRelevancyMetric, ContextualRelevancyMetric, FaithfulnessMetric
 from deepeval.test_case import LLMTestCase
-import pytest
 
 logger = logging.getLogger(__name__)
 
@@ -80,9 +80,7 @@ def test_answer_relevancy_metric_validation(judge_model):
         "Researchers at the Helmholtz-Zentrum Berlin have developed a novel perovskite-silicon tandem solar cell that achieved a certified power conversion efficiency of 34.6% in laboratory tests."
     ]
     # Irrelevant response dodging the query about efficiency
-    irrelevant_output = (
-        "Solar panels are generally rectangular, blue or black, and mounted on residential rooftops during bright sunny weather."
-    )
+    irrelevant_output = "Solar panels are generally rectangular, blue or black, and mounted on residential rooftops during bright sunny weather."
 
     test_case = LLMTestCase(
         input=query,
@@ -102,4 +100,3 @@ def test_answer_relevancy_metric_validation(judge_model):
         metric.score < 0.7
     ), f"Expected AnswerRelevancyMetric to fail (< 0.7), but got score: {metric.score}"
     logger.info("AnswerRelevancyMetric validation verified successfully!")
-
