@@ -12,6 +12,7 @@ load_dotenv()
 
 from deepeval.models import GeminiModel, OllamaModel
 
+from ai_evaluation.agents.minimal_agent import MinimalAgent
 from ai_evaluation.groq_model import GroqModel
 from ai_evaluation.llm_generator import LLMGenerator
 from ai_evaluation.rag_pipeline import RAGPipeline
@@ -111,6 +112,12 @@ def test_data_loader() -> Callable[[str], dict]:
 def llm_generator(api_key):
     """Provide a configured Gemini response generator."""
     return LLMGenerator(api_key)
+
+
+@pytest.fixture
+def minimal_agent(api_key):
+    """Provide a configured MinimalAgent with single tool selection capability."""
+    return MinimalAgent(api_key)
 
 
 @pytest.fixture

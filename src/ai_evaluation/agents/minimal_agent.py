@@ -38,6 +38,7 @@ class MinimalAgent:
         logger.info("Executing MinimalAgent prompt: %s", user_prompt)
         config = types.GenerateContentConfig(
             tools=[get_weather],
+            automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         )
 
         response = self.client.models.generate_content(
