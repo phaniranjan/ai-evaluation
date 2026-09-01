@@ -5,8 +5,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable
 
-from dotenv import load_dotenv
 import pytest
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -14,6 +14,8 @@ from deepeval.models import GeminiModel, OllamaModel
 
 from ai_evaluation.groq_model import GroqModel
 from ai_evaluation.llm_generator import LLMGenerator
+from ai_evaluation.rag_pipeline import RAGPipeline
+from ai_evaluation.rag_retriever import BM25Retriever
 
 
 # Configure logging
@@ -98,12 +100,7 @@ def test_data_loader() -> Callable[[str], dict]:
     def load_test_data(filename: str) -> dict:
         # Determine if this is dynamic or static data based on filename
         data_type = "dynamic" if "dynamic" in filename else "static"
-        data_path = (
-            Path(__file__).parent
-            / "data"
-            / data_type
-            / filename
-        )
+        data_path = Path(__file__).parent / "data" / data_type / filename
         with data_path.open(encoding="utf-8") as file:
             return json.load(file)
 
@@ -125,25 +122,26 @@ def response_generator(llm_generator):
 @pytest.fixture
 def conversation_generator(llm_generator):
     """Fixture for generating multi-turn conversations."""
+
     def generate_conversation(initial_prompt: str, turns: list) -> list:
         """
         Generate a multi-turn conversation.
-        
+
         Args:
             initial_prompt: Initial prompt or context for the conversation
             turns: List of user messages to generate responses for
-        
+
         Returns:
             List of {"role": "user"/"assistant", "content": "..."} dicts
         """
         conversation = []
         history = []
-        
+
         for turn_idx, user_msg in enumerate(turns):
             # Add user message
             conversation.append({"role": "user", "content": user_msg})
             history.append({"role": "user", "content": user_msg})
-            
+
             # Generate assistant response
             assistant_response = llm_generator.generate_conversation_turn(
                 user_msg,
@@ -152,7 +150,27 @@ def conversation_generator(llm_generator):
             )
             conversation.append({"role": "assistant", "content": assistant_response})
             history.append({"role": "assistant", "content": assistant_response})
-        
+
         return conversation
-    
+
     return generate_conversation
+
+
+@pytest.fixture
+def rag_retriever():
+    """Fixture initializing BM25Retriever loaded with news articles."""
+    data_path = (
+        Path(__file__).parent.parent / "src" / "ai_evaluation" / "data" / "rag_news_articles.json"
+    )
+    with data_path.open(encoding="utf-8") as f:
+        articles = json.load(f)
+
+    retriever = BM25Retriever()
+    retriever.add_articles(articles)
+    return retriever
+
+
+@pytest.fixture
+def rag_pipeline(llm_generator, rag_retriever):
+    """Fixture returning RAGPipeline backed by BM25Retriever and LLMGenerator."""
+    return RAGPipeline(retriever=rag_retriever, llm_generator=llm_generator, default_top_k=2)

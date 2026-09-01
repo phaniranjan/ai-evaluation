@@ -1,42 +1,11 @@
-"""System Under Test (SUT) evaluation testing RAG pipeline for hallucinations."""
-
-import json
 import logging
-from pathlib import Path
 
 import pytest
 from deepeval import assert_test
 from deepeval.metrics import HallucinationMetric
 from deepeval.test_case import LLMTestCase
 
-from ai_evaluation.rag_pipeline import RAGPipeline
-from ai_evaluation.rag_retriever import BM25Retriever
-
 logger = logging.getLogger(__name__)
-
-
-@pytest.fixture
-def rag_retriever():
-    """Fixture initializing BM25Retriever loaded with news articles."""
-    data_path = (
-        Path(__file__).parent.parent.parent
-        / "src"
-        / "ai_evaluation"
-        / "data"
-        / "rag_news_articles.json"
-    )
-    with data_path.open(encoding="utf-8") as f:
-        articles = json.load(f)
-
-    retriever = BM25Retriever()
-    retriever.add_articles(articles)
-    return retriever
-
-
-@pytest.fixture
-def rag_pipeline(llm_generator, rag_retriever):
-    """Fixture returning RAGPipeline backed by BM25Retriever and LLMGenerator."""
-    return RAGPipeline(retriever=rag_retriever, llm_generator=llm_generator, default_top_k=2)
 
 
 @pytest.mark.dynamic
