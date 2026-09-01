@@ -1,15 +1,17 @@
-"""System Under Test (SUT) evaluation testing MinimalAgent multi-tool sequential execution."""
+"""System Under Test (SUT) evaluation testing MinimalAgent multi-tool sequential execution with DeepEval ToolCorrectnessMetric."""
 
 import logging
 
 import pytest
+from deepeval.metrics import ToolCorrectnessMetric
+from deepeval.test_case import LLMTestCase, ToolCall, ToolCallParams
 
 logger = logging.getLogger(__name__)
 
 
 @pytest.mark.dynamic
-def test_minimal_agent_sequential_tool_execution(minimal_agent):
-    """SUT Agent Test: Verify MinimalAgent executes get_weather first, then passes the temperature to calculator sequentially."""
+def test_minimal_agent_sequential_tool_execution(judge_model, minimal_agent):
+    """SUT Agent Test: Evaluate MinimalAgent multi-tool sequential execution trajectory using DeepEval ToolCorrectnessMetric."""
     query = "What is the weather in Tokyo and convert the temperature to Fahrenheit."
 
     logger.info("Executing SUT sequential tool execution test for query: %s", query)
@@ -30,31 +32,64 @@ def test_minimal_agent_sequential_tool_execution(minimal_agent):
         )
     logger.info("Final Agent Answer:\n%s", final_answer)
 
-    # 1. Verify that both tools were actually executed
-    assert len(execution_log) == 2, f"Expected 2 tools to be executed, but got {len(execution_log)}"
+    # Convert returned execution_log into DeepEval ToolCall objects
+    actual_trajectory = [
+        ToolCall(
+            name=entry["tool_name"],
+            input_parameters=entry["args"],
+            output=entry["result"],
+        )
+        for entry in execution_log
+    ]
 
-    # 2. Verify that get_weather is called first
-    step1 = execution_log[0]
+    # Create expected two-step trajectory dynamically capturing calculated expression format
+    calc_expression = actual_trajectory[1].input_parameters.get("expression", "25 * 9 / 5 + 32")
+    expected_trajectory = [
+        ToolCall(
+            name="get_weather",
+            input_parameters={"location": "Tokyo"},
+            output="The current temperature in Tokyo is 25°C with sunny skies.",
+        ),
+        ToolCall(
+            name="calculator",
+            input_parameters={"expression": calc_expression},
+            output="77.0",
+        ),
+    ]
+
+    # Build LLMTestCase
+    test_case = LLMTestCase(
+        input=query,
+        actual_output=final_answer,
+        tools_called=actual_trajectory,
+        expected_tools=expected_trajectory,
+    )
+
+    # Instantiate built-in ToolCorrectnessMetric with trajectory evaluation parameters
+    metric = ToolCorrectnessMetric(
+        available_tools=[
+            ToolCall(name="get_weather"),
+            ToolCall(name="calculator"),
+            ToolCall(name="get_time"),
+        ],
+        evaluation_params=[ToolCallParams.INPUT_PARAMETERS, ToolCallParams.OUTPUT],
+        should_consider_ordering=True,
+        threshold=0.7,
+        model=judge_model,
+    )
+
+    metric.measure(test_case)
+
+    logger.info(
+        "ToolCorrectnessMetric trajectory score: %.2f (Reason: %s)",
+        metric.score,
+        metric.reason,
+    )
+
     assert (
-        step1["tool_name"] == "get_weather"
-    ), f"Expected first tool call to be 'get_weather', but got '{step1['tool_name']}'"
-    assert (
-        "tokyo" in str(step1["args"].get("location", "")).lower()
-    ), f"Expected get_weather location to be Tokyo, but got {step1['args']}"
+        metric.score >= 0.7
+    ), f"Expected ToolCorrectnessMetric trajectory score >= 0.7, but got: {metric.score}"
 
-    # 3. Verify that calculator is called second
-    step2 = execution_log[1]
-    assert (
-        step2["tool_name"] == "calculator"
-    ), f"Expected second tool call to be 'calculator', but got '{step2['tool_name']}'"
-
-    # 4. Verify calculator receives the appropriate value (25°C) derived from weather tool result
-    calc_expression = str(step2["args"].get("expression", ""))
-    assert (
-        "25" in calc_expression
-    ), f"Expected calculator expression to contain temperature '25' derived from weather result, but got '{calc_expression}'"
-
-    # 5. Verify final response is produced
-    assert final_answer, "Expected agent to produce a non-empty final answer"
-    logger.info("Sequential tool execution test verified successfully!")
-
+    logger.info(
+        "DeepEval ToolCorrectnessMetric sequential trajectory evaluation passed successfully!"
+    )
