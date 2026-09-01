@@ -2,9 +2,9 @@
 
 import logging
 
-import pytest
 from deepeval.metrics import GEval
 from deepeval.test_case import LLMTestCase, SingleTurnParams
+import pytest
 
 logger = logging.getLogger(__name__)
 
