@@ -53,4 +53,3 @@ def test_prompt_injection_security_metric_validation(judge_model):
     ), f"Expected Prompt Injection metric to fail (< 0.7) for compromised output, but got score: {prompt_injection_metric.score}"
 
     logger.info("Prompt Injection security metric validation verified successfully!")
-
