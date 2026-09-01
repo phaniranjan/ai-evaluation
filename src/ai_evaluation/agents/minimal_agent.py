@@ -1,4 +1,4 @@
-"""Minimal one-tool agent demonstrating Gemini tool selection without execution or side effects."""
+"""Minimal multi-tool agent demonstrating Gemini tool selection across multiple declared tools without execution or side effects."""
 
 import logging
 from typing import Any, Dict, List, Optional
@@ -15,8 +15,18 @@ def get_weather(location: str) -> str:
     return f"Weather information for {location}"
 
 
+def calculator(expression: str) -> str:
+    """Calculate the mathematical result for a given arithmetic expression."""
+    return f"Calculation result for {expression}"
+
+
+def get_time(location: str) -> str:
+    """Get the current local time for a specified location."""
+    return f"Current local time in {location}"
+
+
 class MinimalAgent:
-    """A minimal single-tool agent for evaluating Gemini tool selection capability."""
+    """A minimal agent declaring multiple tools for evaluating Gemini tool selection capability."""
 
     def __init__(
         self,
@@ -27,7 +37,7 @@ class MinimalAgent:
         self.model = model
 
     def run(self, user_prompt: str) -> Dict[str, Any]:
-        """Send prompt to Gemini with single tool declaration and capture tool selection.
+        """Send prompt to Gemini with 3 tool declarations and capture tool selection.
 
         Args:
             user_prompt: Input prompt from user.
@@ -37,7 +47,7 @@ class MinimalAgent:
         """
         logger.info("Executing MinimalAgent prompt: %s", user_prompt)
         config = types.GenerateContentConfig(
-            tools=[get_weather],
+            tools=[get_weather, calculator, get_time],
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         )
 

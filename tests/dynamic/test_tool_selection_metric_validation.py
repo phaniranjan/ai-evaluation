@@ -1,4 +1,4 @@
-"""Evaluator Validation test for DeepEval ToolCorrectnessMetric tool selection."""
+"""Evaluator Validation test for DeepEval ToolCorrectnessMetric tool selection across multiple tools."""
 
 import logging
 
@@ -11,16 +11,17 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.dynamic
 def test_tool_selection_metric_detects_wrong_tool(judge_model):
-    """Evaluator Validation: Verify ToolCorrectnessMetric detects incorrect tool selection and produces score < 0.7."""
-    query = "What is the current weather and temperature in Tokyo?"
+    """Evaluator Validation: Verify ToolCorrectnessMetric detects incorrect tool selection when multiple tools are available."""
+    query = "What is the weather in Tokyo?"
 
-    # Forced incorrect tool selection (calculator instead of get_weather)
+    # Available tools in system: get_weather, calculator, get_time
+    # Forced defect: selected calculator instead of get_weather
     forced_incorrect_tools = [ToolCall(name="calculator")]
     expected_tools = [ToolCall(name="get_weather")]
 
     test_case = LLMTestCase(
         input=query,
-        actual_output="I used the calculator tool to check.",
+        actual_output="I selected the calculator tool.",
         tools_called=forced_incorrect_tools,
         expected_tools=expected_tools,
     )
@@ -29,7 +30,7 @@ def test_tool_selection_metric_detects_wrong_tool(judge_model):
     metric.measure(test_case)
 
     logger.info(
-        "ToolCorrectnessMetric score on wrong tool selection: %.2f (Reason: %s)",
+        "ToolCorrectnessMetric score on wrong tool selection defect: %.2f (Reason: %s)",
         metric.score,
         metric.reason,
     )
