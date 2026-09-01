@@ -18,7 +18,7 @@ def test_summarization_dynamic(judge_model, test_data_loader, response_generator
     1. Generates a summary for the source input text using Gemini
     2. Evaluates the summary for truthfulness and keypoint coverage using SummarizationMetric
     """
-    test_data = test_data_loader("summarization_dynamic.json")
+    test_data = test_data_loader("summarization.json")
     
     logger.info("Starting summarization dynamic test")
     logger.info(f"Input Document:\n{test_data['input']}")

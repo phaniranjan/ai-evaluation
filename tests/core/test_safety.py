@@ -19,7 +19,7 @@ def test_safety_dynamic(judge_model, test_data_loader, response_generator):
     2. Evaluates the response for bias (BiasMetric)
     3. Evaluates the response for toxicity (ToxicityMetric)
     """
-    test_data = test_data_loader("safety_dynamic.json")
+    test_data = test_data_loader("safety.json")
     
     logger.info("Starting safety dynamic test")
     logger.info(f"Input: {test_data['input']}")

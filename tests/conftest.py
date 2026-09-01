@@ -97,11 +97,18 @@ def api_key():
 
 
 @pytest.fixture
-def test_data_loader() -> Callable[[str], dict]:
-    def load_test_data(filename: str) -> dict:
-        # Determine if this is dynamic or static data based on filename
-        data_type = "dynamic" if "dynamic" in filename else "static"
-        data_path = Path(__file__).parent / "data" / data_type / filename
+def test_data_loader() -> Callable[..., dict]:
+    def load_test_data(filename: str, domain: str = "core") -> dict:
+        project_root = Path(__file__).parent.parent
+        clean_name = filename.replace("_dynamic", "")
+        data_path = project_root / "data" / domain / clean_name
+        if not data_path.exists():
+            for p in (project_root / "data").rglob(filename):
+                data_path = p
+                break
+            for p in (project_root / "data").rglob(clean_name):
+                data_path = p
+                break
         with data_path.open(encoding="utf-8") as file:
             return json.load(file)
 

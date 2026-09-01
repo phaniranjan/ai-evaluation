@@ -19,7 +19,7 @@ def test_single_turn_dynamic(judge_model, test_data_loader, response_generator):
     2. Evaluates correctness against expected output (GEval)
     3. Evaluates answer relevancy against input prompt (AnswerRelevancyMetric)
     """
-    test_data = test_data_loader("single_turn_dynamic.json")
+    test_data = test_data_loader("single_turn.json")
     
     logger.info("Starting single-turn dynamic test")
     logger.info(f"Input: {test_data['input']}")

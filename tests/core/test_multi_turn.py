@@ -20,7 +20,7 @@ def test_multi_turn_dynamic(
     1. Generates a multi-turn conversation with LLM-generated assistant responses
     2. Evaluates the conversation using ConversationalGEval (LLM-as-judge)
     """
-    test_data = test_data_loader("multi_turn_dynamic.json")
+    test_data = test_data_loader("multi_turn.json")
     
     logger.info("Starting multi-turn dynamic test")
     logger.info(f"Generating conversation with {len(test_data['user_turns'])} turns...")
