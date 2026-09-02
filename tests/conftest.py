@@ -3,11 +3,7 @@ import logging
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Callable
 from typing import Callable, List, Optional
-
-import pytest
-from dotenv import load_dotenv
 
 load_dotenv()
 
