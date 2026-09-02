@@ -24,6 +24,31 @@
         "input_parameters": {"expression": "(25 * 9/5) + 32"}
       }
     ]
+  },
+  {
+    "id": "agent_trajectory_time_difference_03",
+    "name": "Multi-Tool Sequential Trajectory - Time Lookup & Hour Addition",
+    "input": "What is the current time in Tokyo and add 5 hours to it?",
+    "expected_tools": [
+      {
+        "name": "get_time",
+        "input_parameters": {"location": "Tokyo"}
+      },
+      {
+        "name": "calculator",
+        "input_parameters": {"expression": "12 + 5"}
+      }
+    ]
+  },
+  {
+    "id": "agent_trajectory_invalid_location_04",
+    "name": "Single-Tool Trajectory - Invalid Location Query & Error Recovery",
+    "input": "What is the weather in Atlantis?",
+    "expected_tools": [
+      {
+        "name": "get_weather",
+        "input_parameters": {"location": "Atlantis"}
+      }
+    ]
   }
 ]
-
