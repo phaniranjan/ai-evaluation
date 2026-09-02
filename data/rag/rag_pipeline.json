@@ -1,0 +1,21 @@
+[
+  {
+    "id": "rag_solar_efficiency_01",
+    "name": "Solar Panel Efficiency Query",
+    "input": "What is the average efficiency of modern commercial solar panels?",
+    "reference_answer": "Commercial solar panel efficiency typically ranges between 15% and 22%.",
+    "reference_context": [
+      "Most commercial solar panels currently operate at an efficiency rating between 15% and 22%."
+    ]
+  },
+  {
+    "id": "rag_ai_benchmark_02",
+    "name": "AI Benchmark Evolution Query",
+    "input": "How do AI benchmarks evolve over time?",
+    "reference_answer": "AI benchmarks evolve as technology advances, with older benchmarks becoming outdated when models achieve peak human performance.",
+    "reference_context": [
+      "As technology advances, previous AI benchmarks become outdated when AI models routinely achieve top performance."
+    ]
+  }
+]
+

@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 from typing import Callable
+from typing import Callable, List, Optional
 
 import pytest
 from dotenv import load_dotenv
@@ -94,6 +95,19 @@ def judge_model(request):
 def api_key():
     """Fixture for accessing the Gemini API key."""
     return os.environ["GEMINI_API_KEY"]
+
+
+def load_golden_cases(
+    filename: str, domain: str = "core", prefix_filter: Optional[str] = None
+) -> List[dict]:
+    """Load golden dataset test cases at collection time for pytest parameterization."""
+    project_root = Path(__file__).parent.parent
+    data_path = project_root / "data" / domain / filename
+    with data_path.open(encoding="utf-8") as f:
+        cases = json.load(f)
+    if prefix_filter:
+        return [c for c in cases if c.get("id", "").startswith(prefix_filter)]
+    return cases
 
 
 @pytest.fixture

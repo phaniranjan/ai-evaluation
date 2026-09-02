@@ -2,9 +2,9 @@
 
 import logging
 
+import pytest
 from deepeval.metrics import ToolCorrectnessMetric
 from deepeval.test_case import LLMTestCase, ToolCall, ToolCallParams
-import pytest
 
 logger = logging.getLogger(__name__)
 
@@ -74,4 +74,3 @@ def test_tool_trajectory_metric_detects_out_of_order_execution(judge_model):
     ), f"Expected ToolCorrectnessMetric to fail (< 0.7) for out-of-order trajectory, but got score: {metric.score}"
 
     logger.info("ToolCorrectnessMetric trajectory ordering defect detection verified successfully!")
-

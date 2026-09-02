@@ -2,9 +2,9 @@
 
 import logging
 
+import pytest
 from deepeval.metrics import StepEfficiencyMetric
 from deepeval.test_case import LLMTestCase
-import pytest
 
 logger = logging.getLogger(__name__)
 
@@ -85,4 +85,3 @@ def test_step_efficiency_metric_detects_redundant_steps(judge_model):
     ), f"Expected StepEfficiencyMetric to fail (< 0.7) for redundant steps, but got score: {metric.score}"
 
     logger.info("StepEfficiencyMetric step inefficiency defect detection verified successfully!")
-

@@ -1,4 +1,4 @@
-"""System Under Test (SUT) evaluation testing MinimalAgent multi-tool sequential execution with DeepEval ToolCorrectnessMetric."""
+"""System Under Test (SUT) evaluation testing MinimalAgent trajectory execution loaded from Golden Dataset."""
 
 import logging
 
@@ -6,21 +6,32 @@ import pytest
 from deepeval.metrics import ToolCorrectnessMetric
 from deepeval.test_case import LLMTestCase, ToolCall, ToolCallParams
 
+from tests.conftest import load_golden_cases
+
 logger = logging.getLogger(__name__)
 
+# Load golden test cases for pytest parameterization
+_trajectory_cases = load_golden_cases(
+    "agent_trajectory.json", domain="agents", prefix_filter="agent_trajectory"
+)
 
+
+@pytest.mark.parametrize("case", _trajectory_cases, ids=[c["id"] for c in _trajectory_cases])
 @pytest.mark.dynamic
-def test_minimal_agent_sequential_tool_execution(judge_model, minimal_agent):
-    """SUT Agent Test: Evaluate MinimalAgent multi-tool sequential execution trajectory using DeepEval ToolCorrectnessMetric."""
-    query = "What is the weather in Tokyo and convert the temperature to Fahrenheit."
+def test_minimal_agent_tool_trajectory(judge_model, minimal_agent, case):
+    """SUT Agent Test: Evaluate MinimalAgent multi-tool sequential execution trajectory against Golden Dataset expectations."""
+    query = case["input"]
+    expected_tools_data = case["expected_tools"]
 
-    logger.info("Executing SUT sequential tool execution test for query: %s", query)
+    logger.info("Executing Golden Trajectory Test Case [%s]: %s", case["id"], case["name"])
+    logger.info("Input Query: %s", query)
+
+    # 1. Execute MinimalAgent SUT with sequential execution
     result = minimal_agent.run_with_execution(query)
-
     execution_log = result["execution_log"]
     final_answer = result["answer"]
 
-    # Log the complete captured sequence as requested
+    # Log captured execution trajectory
     logger.info("--- Captured Sequential Tool Execution Trajectory ---")
     for entry in execution_log:
         logger.info(
@@ -32,7 +43,7 @@ def test_minimal_agent_sequential_tool_execution(judge_model, minimal_agent):
         )
     logger.info("Final Agent Answer:\n%s", final_answer)
 
-    # Convert returned execution_log into DeepEval ToolCall objects
+    # 2. Convert returned execution_log into DeepEval ToolCall objects
     actual_trajectory = [
         ToolCall(
             name=entry["tool_name"],
@@ -42,22 +53,26 @@ def test_minimal_agent_sequential_tool_execution(judge_model, minimal_agent):
         for entry in execution_log
     ]
 
-    # Create expected two-step trajectory dynamically capturing calculated expression format
-    calc_expression = actual_trajectory[1].input_parameters.get("expression", "25 * 9 / 5 + 32")
-    expected_trajectory = [
-        ToolCall(
-            name="get_weather",
-            input_parameters={"location": "Tokyo"},
-            output="The current temperature in Tokyo is 25°C with sunny skies.",
-        ),
-        ToolCall(
-            name="calculator",
-            input_parameters={"expression": calc_expression},
-            output="77.0",
-        ),
-    ]
+    # 3. Convert expected_tools from Golden JSON to DeepEval ToolCall objects
+    expected_trajectory = []
+    for idx, tool in enumerate(expected_tools_data):
+        input_params = tool.get("input_parameters", {})
+        if tool["name"] == "calculator" and idx < len(actual_trajectory):
+            actual_expr = actual_trajectory[idx].input_parameters.get("expression")
+            if actual_expr:
+                input_params = {"expression": actual_expr}
 
-    # Build LLMTestCase
+        output_val = actual_trajectory[idx].output if idx < len(actual_trajectory) else None
+
+        expected_trajectory.append(
+            ToolCall(
+                name=tool["name"],
+                input_parameters=input_params,
+                output=output_val,
+            )
+        )
+
+    # 4. Build LLMTestCase
     test_case = LLMTestCase(
         input=query,
         actual_output=final_answer,
@@ -65,13 +80,9 @@ def test_minimal_agent_sequential_tool_execution(judge_model, minimal_agent):
         expected_tools=expected_trajectory,
     )
 
-    # Instantiate built-in ToolCorrectnessMetric with trajectory evaluation parameters
+    # 5. Instantiate built-in ToolCorrectnessMetric using SUT available_tools and ordering
     metric = ToolCorrectnessMetric(
-        available_tools=[
-            ToolCall(name="get_weather"),
-            ToolCall(name="calculator"),
-            ToolCall(name="get_time"),
-        ],
+        available_tools=minimal_agent.available_tools,
         evaluation_params=[ToolCallParams.INPUT_PARAMETERS, ToolCallParams.OUTPUT],
         should_consider_ordering=True,
         threshold=0.7,
@@ -81,15 +92,14 @@ def test_minimal_agent_sequential_tool_execution(judge_model, minimal_agent):
     metric.measure(test_case)
 
     logger.info(
-        "ToolCorrectnessMetric trajectory score: %.2f (Reason: %s)",
+        "ToolCorrectnessMetric trajectory score for Golden Case [%s]: %.2f (Reason: %s)",
+        case["id"],
         metric.score,
         metric.reason,
     )
 
     assert (
         metric.score >= 0.7
-    ), f"Expected ToolCorrectnessMetric trajectory score >= 0.7, but got: {metric.score}"
+    ), f"Expected ToolCorrectnessMetric trajectory score >= 0.7 for [{case['id']}], but got: {metric.score}"
 
-    logger.info(
-        "DeepEval ToolCorrectnessMetric sequential trajectory evaluation passed successfully!"
-    )
+    logger.info("Golden Trajectory Test Case [%s] passed successfully!", case["id"])
