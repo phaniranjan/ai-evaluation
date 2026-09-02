@@ -1,21 +1,19 @@
 """System Under Test (SUT) evaluation testing MinimalAgent trajectory execution loaded from Golden Dataset."""
 
-import json
 import logging
-from pathlib import Path
 
 import pytest
 from deepeval.metrics import ToolCorrectnessMetric
 from deepeval.test_case import LLMTestCase, ToolCall, ToolCallParams
 
+from tests.conftest import load_golden_cases
+
 logger = logging.getLogger(__name__)
 
 # Load golden test cases for pytest parameterization
-_golden_file = Path(__file__).parent.parent.parent / "data" / "agents" / "agent_trajectory.json"
-with _golden_file.open(encoding="utf-8") as _f:
-    _all_cases = json.load(_f)
-# Filter for trajectory execution cases
-_trajectory_cases = [c for c in _all_cases if c["id"].startswith("agent_trajectory")]
+_trajectory_cases = load_golden_cases(
+    "agent_trajectory.json", domain="agents", prefix_filter="agent_trajectory"
+)
 
 
 @pytest.mark.parametrize("case", _trajectory_cases, ids=[c["id"] for c in _trajectory_cases])

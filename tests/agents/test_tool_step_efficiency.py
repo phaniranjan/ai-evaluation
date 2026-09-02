@@ -2,9 +2,9 @@
 
 import logging
 
+import pytest
 from deepeval.metrics import StepEfficiencyMetric
 from deepeval.test_case import LLMTestCase
-import pytest
 
 logger = logging.getLogger(__name__)
 
@@ -59,4 +59,3 @@ def test_minimal_agent_step_efficiency(judge_model, minimal_agent):
     ), f"Expected StepEfficiencyMetric score >= 0.7, but got: {metric.score}"
 
     logger.info("MinimalAgent step efficiency evaluation passed successfully!")
-

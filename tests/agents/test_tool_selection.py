@@ -1,21 +1,19 @@
 """System Under Test (SUT) evaluation testing MinimalAgent tool selection using Golden Dataset cases."""
 
-import json
 import logging
-from pathlib import Path
 
 import pytest
 from deepeval.metrics import ToolCorrectnessMetric
 from deepeval.test_case import LLMTestCase, ToolCall
 
+from tests.conftest import load_golden_cases
+
 logger = logging.getLogger(__name__)
 
 # Load golden test cases for pytest parameterization
-_golden_file = Path(__file__).parent.parent.parent / "data" / "agents" / "agent_trajectory.json"
-with _golden_file.open(encoding="utf-8") as _f:
-    _all_cases = json.load(_f)
-# Filter for single-tool selection cases
-_selection_cases = [c for c in _all_cases if c["id"].startswith("agent_tool_selection")]
+_selection_cases = load_golden_cases(
+    "agent_trajectory.json", domain="agents", prefix_filter="agent_tool_selection"
+)
 
 
 @pytest.mark.parametrize("case", _selection_cases, ids=[c["id"] for c in _selection_cases])
