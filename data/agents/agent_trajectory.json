@@ -1,0 +1,28 @@
+[
+  {
+    "id": "agent_tool_selection_01",
+    "name": "Weather Single-Tool Selection",
+    "input": "What's the weather in Tokyo?",
+    "expected_tools": [
+      {
+        "name": "get_weather",
+        "input_parameters": {"location": "Tokyo"}
+      }
+    ]
+  },
+  {
+    "id": "agent_trajectory_weather_conversion_02",
+    "name": "Multi-Tool Sequential Trajectory - Weather & Fahrenheit Conversion",
+    "input": "What is the weather in Tokyo and convert the temperature to Fahrenheit.",
+    "expected_tools": [
+      {
+        "name": "get_weather",
+        "input_parameters": {"location": "Tokyo"}
+      },
+      {
+        "name": "calculator",
+        "input_parameters": {"expression": "(25 * 9/5) + 32"}
+      }
+    ]
+  }
+]
