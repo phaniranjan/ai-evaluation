@@ -1,4 +1,4 @@
-"""System Under Test (SUT) evaluation testing MinimalAgent tool selection across multiple tools."""
+"""System Under Test (SUT) evaluation testing MinimalAgent tool selection loaded from Golden Dataset."""
 
 import logging
 
@@ -9,32 +9,34 @@ from deepeval.test_case import LLMTestCase, ToolCall
 logger = logging.getLogger(__name__)
 
 
-@pytest.mark.parametrize(
-    "user_query,expected_tool_name",
-    [
-        ("What's the weather in Tokyo?", "get_weather"),
-        ("What is 125 * 37?", "calculator"),
-        ("What time is it in Tokyo?", "get_time"),
-    ],
-)
 @pytest.mark.dynamic
-def test_minimal_agent_multi_tool_selection(
-    judge_model, minimal_agent, user_query, expected_tool_name
-):
-    """SUT Agent Test: Verify MinimalAgent correctly selects the appropriate tool among multiple declared tools."""
-    logger.info("Executing MinimalAgent multi-tool selection test for query: %s", user_query)
+def test_minimal_agent_tool_selection_from_golden(judge_model, minimal_agent, test_data_loader):
+    """SUT Agent Test: Evaluate MinimalAgent tool selection using test case loaded from Golden Dataset."""
+    # 1. Load golden test case from data/agents/agent_trajectory.json
+    cases = test_data_loader("agent_trajectory.json", domain="agents")
+    case = cases[0]  # agent_tool_selection_01
 
-    # Execute MinimalAgent to capture Gemini's actual tool selection among 3 tools
+    user_query = case["input"]
+    expected_tools_data = case["expected_tools"]
+
+    logger.info("Executing Golden Test Case [%s]: %s", case["id"], case["name"])
+    logger.info("Input Query: %s", user_query)
+
+    # 2. Execute MinimalAgent SUT
     result = minimal_agent.run(user_query)
-
     actual_tools_called = result["tools_called"]
     actual_answer = result["answer"]
 
-    logger.info("Query: %s | Expected Tool: %s", user_query, expected_tool_name)
-    logger.info("Actual tools called: %s", actual_tools_called)
+    # 3. Convert expected_tools from Golden JSON to DeepEval ToolCall instances
+    expected_tools = [
+        ToolCall(
+            name=tool["name"],
+            input_parameters=tool.get("input_parameters"),
+        )
+        for tool in expected_tools_data
+    ]
 
-    expected_tools = [ToolCall(name=expected_tool_name)]
-
+    # 4. Construct LLMTestCase
     test_case = LLMTestCase(
         input=user_query,
         actual_output=actual_answer,
@@ -42,18 +44,19 @@ def test_minimal_agent_multi_tool_selection(
         expected_tools=expected_tools,
     )
 
+    # 5. Measure using DeepEval ToolCorrectnessMetric
     metric = ToolCorrectnessMetric(threshold=0.7, model=judge_model)
     metric.measure(test_case)
 
     logger.info(
-        "ToolCorrectnessMetric score for query '%s': %.2f (Reason: %s)",
-        user_query,
+        "ToolCorrectnessMetric score for Golden Case [%s]: %.2f (Reason: %s)",
+        case["id"],
         metric.score,
         metric.reason,
     )
 
     assert (
         metric.score >= 0.7
-    ), f"Expected ToolCorrectnessMetric to pass (>= 0.7) for '{user_query}', but got score: {metric.score}"
+    ), f"Expected ToolCorrectnessMetric >= 0.7 for '{user_query}', but got score: {metric.score}"
 
-    logger.info("Tool selection evaluation passed successfully for tool: %s", expected_tool_name)
+    logger.info("Golden Tool Selection Test Case [%s] passed successfully!", case["id"])
