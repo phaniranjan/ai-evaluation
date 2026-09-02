@@ -67,7 +67,8 @@ disallow_untyped_defs = false
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-testpaths = ["."]
+testpaths = ["tests"]
+norecursedirs = ["tests/static", "deepeval_venv", ".git"]
 python_files = "test_*.py"
 addopts = "-v --strict-markers --tb=short"
 log_cli = true
