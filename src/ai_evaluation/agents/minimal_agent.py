@@ -40,6 +40,15 @@ class MinimalAgent:
         self.client = genai.Client(api_key=api_key)
         self.model = model
 
+    @property
+    def available_tools(self) -> List[ToolCall]:
+        """Provide list of declared tools as DeepEval ToolCall objects for metric evaluation."""
+        return [
+            ToolCall(name="get_weather", description="Get current weather for location"),
+            ToolCall(name="calculator", description="Calculate math expression"),
+            ToolCall(name="get_time", description="Get current local time"),
+        ]
+
     def run(self, user_prompt: str) -> Dict[str, Any]:
         """Send prompt to Gemini with tool declarations and capture initial tool selection without execution.
 

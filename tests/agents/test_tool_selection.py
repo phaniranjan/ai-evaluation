@@ -50,8 +50,12 @@ def test_minimal_agent_tool_selection(judge_model, minimal_agent, case):
         expected_tools=expected_tools,
     )
 
-    # 4. Measure using DeepEval ToolCorrectnessMetric
-    metric = ToolCorrectnessMetric(threshold=0.7, model=judge_model)
+    # 4. Measure using DeepEval ToolCorrectnessMetric with SUT declared available_tools
+    metric = ToolCorrectnessMetric(
+        available_tools=minimal_agent.available_tools,
+        threshold=0.7,
+        model=judge_model,
+    )
     metric.measure(test_case)
 
     logger.info(
