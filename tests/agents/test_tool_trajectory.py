@@ -1,9 +1,9 @@
-"""System Under Test (SUT) evaluation testing MinimalAgent trajectory execution loaded from Golden Dataset."""
+"""System Under Test (SUT) evaluation testing MinimalAgent trajectory execution and task completion loaded from Golden Dataset."""
 
 import logging
 
 import pytest
-from deepeval.metrics import ToolCorrectnessMetric
+from deepeval.metrics import TaskCompletionMetric, ToolCorrectnessMetric
 from deepeval.test_case import LLMTestCase, ToolCall, ToolCallParams
 
 from tests.conftest import load_golden_cases
@@ -19,7 +19,7 @@ _trajectory_cases = load_golden_cases(
 @pytest.mark.parametrize("case", _trajectory_cases, ids=[c["id"] for c in _trajectory_cases])
 @pytest.mark.dynamic
 def test_minimal_agent_tool_trajectory(judge_model, minimal_agent, case):
-    """SUT Agent Test: Evaluate MinimalAgent multi-tool sequential execution trajectory against Golden Dataset expectations."""
+    """SUT Agent Test: Evaluate MinimalAgent multi-tool execution trajectory (process) and task completion (outcome)."""
     query = case["input"]
     expected_tools_data = case["expected_tools"]
 
@@ -72,34 +72,70 @@ def test_minimal_agent_tool_trajectory(judge_model, minimal_agent, case):
             )
         )
 
-    # 4. Build LLMTestCase
+    # 4. Build trace_dict tree structure for DeepEval trace metrics
+    children = [
+        {
+            "name": entry["tool_name"],
+            "type": "tool",
+            "input": {"inputParameters": entry["args"]},
+            "output": entry["result"],
+            "children": [],
+        }
+        for entry in execution_log
+    ]
+    trace_dict = {
+        "name": "MinimalAgent",
+        "type": "agent",
+        "input": {"input": query},
+        "children": children,
+    }
+
+    # Build LLMTestCase with both trajectory tools and trace_dict
     test_case = LLMTestCase(
         input=query,
         actual_output=final_answer,
         tools_called=actual_trajectory,
         expected_tools=expected_trajectory,
     )
+    test_case._trace_dict = trace_dict
 
-    # 5. Instantiate built-in ToolCorrectnessMetric using SUT available_tools and ordering
-    metric = ToolCorrectnessMetric(
+    # 5. Process Evaluation: Measure ToolCorrectnessMetric (Selection & Ordering)
+    trajectory_metric = ToolCorrectnessMetric(
         available_tools=minimal_agent.available_tools,
         evaluation_params=[ToolCallParams.INPUT_PARAMETERS, ToolCallParams.OUTPUT],
         should_consider_ordering=True,
         threshold=0.7,
         model=judge_model,
     )
+    trajectory_metric.measure(test_case)
 
-    metric.measure(test_case)
+    # 6. Outcome Evaluation: Measure TaskCompletionMetric (Goal Accomplished)
+    completion_metric = TaskCompletionMetric(
+        threshold=0.7,
+        model=judge_model,
+    )
+    completion_metric.measure(test_case)
 
     logger.info(
-        "ToolCorrectnessMetric trajectory score for Golden Case [%s]: %.2f (Reason: %s)",
+        "ToolCorrectnessMetric score for Golden Case [%s]: %.2f (Reason: %s)",
         case["id"],
-        metric.score,
-        metric.reason,
+        trajectory_metric.score,
+        trajectory_metric.reason,
+    )
+    logger.info(
+        "TaskCompletionMetric score for Golden Case [%s]: %.2f (Reason: %s)",
+        case["id"],
+        completion_metric.score,
+        completion_metric.reason,
     )
 
     assert (
-        metric.score >= 0.7
-    ), f"Expected ToolCorrectnessMetric trajectory score >= 0.7 for [{case['id']}], but got: {metric.score}"
+        trajectory_metric.score >= 0.7
+    ), f"Expected ToolCorrectnessMetric trajectory score >= 0.7 for [{case['id']}], but got: {trajectory_metric.score}"
+    assert (
+        completion_metric.score >= 0.7
+    ), f"Expected TaskCompletionMetric score >= 0.7 for [{case['id']}], but got: {completion_metric.score}"
 
-    logger.info("Golden Trajectory Test Case [%s] passed successfully!", case["id"])
+    logger.info(
+        "Golden Trajectory & Task Completion Test Case [%s] passed successfully!", case["id"]
+    )
