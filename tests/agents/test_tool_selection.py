@@ -1,6 +1,8 @@
-"""System Under Test (SUT) evaluation testing MinimalAgent tool selection loaded from Golden Dataset."""
+"""System Under Test (SUT) evaluation testing MinimalAgent tool selection using Golden Dataset cases."""
 
+import json
 import logging
+from pathlib import Path
 
 import pytest
 from deepeval.metrics import ToolCorrectnessMetric
@@ -8,26 +10,30 @@ from deepeval.test_case import LLMTestCase, ToolCall
 
 logger = logging.getLogger(__name__)
 
+# Load golden test cases for pytest parameterization
+_golden_file = Path(__file__).parent.parent.parent / "data" / "agents" / "agent_trajectory.json"
+with _golden_file.open(encoding="utf-8") as _f:
+    _all_cases = json.load(_f)
+# Filter for single-tool selection cases
+_selection_cases = [c for c in _all_cases if c["id"].startswith("agent_tool_selection")]
 
+
+@pytest.mark.parametrize("case", _selection_cases, ids=[c["id"] for c in _selection_cases])
 @pytest.mark.dynamic
-def test_minimal_agent_tool_selection_from_golden(judge_model, minimal_agent, test_data_loader):
-    """SUT Agent Test: Evaluate MinimalAgent tool selection using test case loaded from Golden Dataset."""
-    # 1. Load golden test case from data/agents/agent_trajectory.json
-    cases = test_data_loader("agent_trajectory.json", domain="agents")
-    case = cases[0]  # agent_tool_selection_01
-
+def test_minimal_agent_tool_selection(judge_model, minimal_agent, case):
+    """SUT Agent Test: Evaluate MinimalAgent tool selection against Golden Dataset expectations."""
     user_query = case["input"]
     expected_tools_data = case["expected_tools"]
 
     logger.info("Executing Golden Test Case [%s]: %s", case["id"], case["name"])
     logger.info("Input Query: %s", user_query)
 
-    # 2. Execute MinimalAgent SUT
+    # 1. Execute MinimalAgent SUT
     result = minimal_agent.run(user_query)
     actual_tools_called = result["tools_called"]
     actual_answer = result["answer"]
 
-    # 3. Convert expected_tools from Golden JSON to DeepEval ToolCall instances
+    # 2. Convert expected_tools from Golden JSON to DeepEval ToolCall instances
     expected_tools = [
         ToolCall(
             name=tool["name"],
@@ -36,7 +42,7 @@ def test_minimal_agent_tool_selection_from_golden(judge_model, minimal_agent, te
         for tool in expected_tools_data
     ]
 
-    # 4. Construct LLMTestCase
+    # 3. Construct LLMTestCase
     test_case = LLMTestCase(
         input=user_query,
         actual_output=actual_answer,
@@ -44,7 +50,7 @@ def test_minimal_agent_tool_selection_from_golden(judge_model, minimal_agent, te
         expected_tools=expected_tools,
     )
 
-    # 5. Measure using DeepEval ToolCorrectnessMetric
+    # 4. Measure using DeepEval ToolCorrectnessMetric
     metric = ToolCorrectnessMetric(threshold=0.7, model=judge_model)
     metric.measure(test_case)
 
@@ -57,6 +63,6 @@ def test_minimal_agent_tool_selection_from_golden(judge_model, minimal_agent, te
 
     assert (
         metric.score >= 0.7
-    ), f"Expected ToolCorrectnessMetric >= 0.7 for '{user_query}', but got score: {metric.score}"
+    ), f"Expected ToolCorrectnessMetric >= 0.7 for [{case['id']}], but got score: {metric.score}"
 
     logger.info("Golden Tool Selection Test Case [%s] passed successfully!", case["id"])
