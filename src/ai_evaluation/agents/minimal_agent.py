@@ -31,6 +31,11 @@ def get_time(location: str) -> str:
     return f"Current local time in {location} is 14:30 PM."
 
 
+def execute_admin_command(command: str) -> str:
+    """Execute simulated administrative system operations (ADMIN role only)."""
+    return f"Simulated execution of admin command '{command}' completed."
+
+
 class MinimalAgent:
     """A minimal agent declaring multiple tools for evaluating Gemini tool selection and sequential execution capabilities."""
 
@@ -49,6 +54,7 @@ class MinimalAgent:
             ToolCall(name="get_weather", description="Get current weather for location"),
             ToolCall(name="calculator", description="Calculate math expression"),
             ToolCall(name="get_time", description="Get current local time"),
+            ToolCall(name="execute_admin_command", description="Execute admin system command"),
         ]
 
     def run(self, user_prompt: str) -> Dict[str, Any]:
@@ -62,7 +68,7 @@ class MinimalAgent:
         """
         logger.info("Executing MinimalAgent prompt: %s", user_prompt)
         config = types.GenerateContentConfig(
-            tools=[get_weather, calculator, get_time],
+            tools=[get_weather, calculator, get_time, execute_admin_command],
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         )
 
@@ -86,17 +92,20 @@ class MinimalAgent:
             "tools_called": tools_called,
         }
 
-    def run_with_execution(self, user_prompt: str) -> Dict[str, Any]:
+    def run_with_execution(self, user_prompt: str, user_role: str = "ADMIN") -> Dict[str, Any]:
         """Execute a multi-tool sequential interaction with automatic tool execution and trajectory tracing.
 
         Args:
             user_prompt: Input prompt from user.
+            user_role: User role ("ADMIN", "USER", or "GUEST") for RBAC tool authorization.
 
         Returns:
             Dict containing final 'answer', 'execution_log' trajectory, and 'tools_called'.
         """
         logger.info(
-            "Executing MinimalAgent with sequential tool execution for prompt: %s", user_prompt
+            "Executing MinimalAgent (Role: %s) with sequential tool execution for prompt: %s",
+            user_role,
+            user_prompt,
         )
         execution_log: List[Dict[str, Any]] = []
 
@@ -145,12 +154,63 @@ class MinimalAgent:
             )
             return res
 
+        def tracked_execute_admin_command(command: str) -> str:
+            res = execute_admin_command(command)
+            order = len(execution_log) + 1
+            log_entry = {
+                "order": order,
+                "tool_name": "execute_admin_command",
+                "args": {"command": command},
+                "result": res,
+            }
+            execution_log.append(log_entry)
+            logger.info(
+                "Sequential Tool Call #%d: execute_admin_command(command=%s) -> %s",
+                order,
+                command,
+                res,
+            )
+            return res
+
+        # Role-based access control (RBAC): Filter tools passed to Gemini config by user_role
+        role_tool_map = {
+            "GUEST": [tracked_get_weather, tracked_get_time],
+            "USER": [tracked_get_weather, tracked_calculator, tracked_get_time],
+            "ADMIN": [
+                tracked_get_weather,
+                tracked_calculator,
+                tracked_get_time,
+                tracked_execute_admin_command,
+            ],
+        }
+        permitted_tools = role_tool_map.get(
+            user_role.upper(), [tracked_get_weather, tracked_get_time]
+        )
+
         config = types.GenerateContentConfig(
-            tools=[tracked_get_weather, tracked_calculator, tracked_get_time],
+            tools=permitted_tools,
         )
 
         chat = self.client.chats.create(model=self.model, config=config)
-        response = chat.send_message(user_prompt)
+
+        # Retry loop for Google API transient 503 Service Unavailable errors
+        max_attempts = 3
+        for attempt in range(1, max_attempts + 1):
+            try:
+                response = chat.send_message(user_prompt)
+                break
+            except Exception as err:
+                if "503" in str(err) and attempt < max_attempts:
+                    logger.warning(
+                        "Google API returned 503 (attempt %d/%d). Retrying in 2 seconds...",
+                        attempt,
+                        max_attempts,
+                    )
+                    import time
+
+                    time.sleep(2)
+                else:
+                    raise err
 
         final_answer = response.text.strip() if response.text else ""
         tools_called = [ToolCall(name=log["tool_name"]) for log in execution_log]
