@@ -43,9 +43,11 @@ class MinimalAgent:
         self,
         api_key: str,
         model: str = "gemini-3.5-flash-lite",
+        user_role: str = "ADMIN",
     ) -> None:
         self.client = genai.Client(api_key=api_key)
         self.model = model
+        self.user_role = user_role
 
     @property
     def available_tools(self) -> List[ToolCall]:
@@ -92,19 +94,22 @@ class MinimalAgent:
             "tools_called": tools_called,
         }
 
-    def run_with_execution(self, user_prompt: str, user_role: str = "ADMIN") -> Dict[str, Any]:
+    def run_with_execution(
+        self, user_prompt: str, user_role: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Execute a multi-tool sequential interaction with automatic tool execution and trajectory tracing.
 
         Args:
             user_prompt: Input prompt from user.
-            user_role: User role ("ADMIN", "USER", or "GUEST") for RBAC tool authorization.
+            user_role: Optional user role ("ADMIN", "USER", or "GUEST") overriding agent instance role.
 
         Returns:
             Dict containing final 'answer', 'execution_log' trajectory, and 'tools_called'.
         """
+        active_role = (user_role or self.user_role).upper()
         logger.info(
             "Executing MinimalAgent (Role: %s) with sequential tool execution for prompt: %s",
-            user_role,
+            active_role,
             user_prompt,
         )
         execution_log: List[Dict[str, Any]] = []
@@ -183,9 +188,7 @@ class MinimalAgent:
                 tracked_execute_admin_command,
             ],
         }
-        permitted_tools = role_tool_map.get(
-            user_role.upper(), [tracked_get_weather, tracked_get_time]
-        )
+        permitted_tools = role_tool_map.get(active_role, [tracked_get_weather, tracked_get_time])
 
         config = types.GenerateContentConfig(
             tools=permitted_tools,
