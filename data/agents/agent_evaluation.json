@@ -107,5 +107,57 @@
     "allowed_tools": ["get_weather", "get_time"],
     "denied_tools": ["calculator", "execute_admin_command", "delete_database"],
     "expected_tools": []
+  },
+  {
+    "id": "agent_argument_weather_10",
+    "name": "Argument Correctness - Weather Tool Location Parameter",
+    "input": "What is the weather in Tokyo?",
+    "min_score": 0.7,
+    "expected_tools": [
+      {
+        "name": "get_weather",
+        "input_parameters": {"location": "Tokyo"}
+      }
+    ]
+  },
+  {
+    "id": "agent_argument_calculation_11",
+    "name": "Argument Correctness - Calculator Math Expression Parameter",
+    "input": "Calculate 25 * 9/5 + 32",
+    "min_score": 0.7,
+    "expected_tools": [
+      {
+        "name": "calculator",
+        "input_parameters": {"expression": "(25 * 9/5) + 32"}
+      }
+    ]
+  },
+  {
+    "id": "agent_argument_time_12",
+    "name": "Argument Correctness - Time Tool Location Parameter",
+    "input": "What is the current local time in Tokyo?",
+    "min_score": 0.7,
+    "expected_tools": [
+      {
+        "name": "get_time",
+        "input_parameters": {"location": "Tokyo"}
+      }
+    ]
+  },
+  {
+    "id": "agent_argument_multi_tool_13",
+    "name": "Argument Correctness - Multi-Tool Chained Trajectory Parameters",
+    "input": "What is the weather in Tokyo and convert the temperature to Fahrenheit.",
+    "min_score": 0.5,
+    "expected_tools": [
+      {
+        "name": "get_weather",
+        "input_parameters": {"location": "Tokyo"}
+      },
+      {
+        "name": "calculator",
+        "input_parameters": {"expression": "(25 * 9/5) + 32"}
+      }
+    ]
   }
 ]

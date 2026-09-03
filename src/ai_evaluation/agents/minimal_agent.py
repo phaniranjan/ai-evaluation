@@ -196,27 +196,32 @@ class MinimalAgent:
 
         chat = self.client.chats.create(model=self.model, config=config)
 
-        # Retry loop for Google API transient 503 Service Unavailable errors
+        # Retry loop for Google API transient 503 & 429 RESOURCE_EXHAUSTED rate limit errors
         max_attempts = 3
         for attempt in range(1, max_attempts + 1):
             try:
                 response = chat.send_message(user_prompt)
                 break
             except Exception as err:
-                if "503" in str(err) and attempt < max_attempts:
+                err_str = str(err)
+                if (
+                    "503" in err_str or "429" in err_str or "RESOURCE_EXHAUSTED" in err_str
+                ) and attempt < max_attempts:
                     logger.warning(
-                        "Google API returned 503 (attempt %d/%d). Retrying in 2 seconds...",
+                        "Google API transient rate limit/server error (attempt %d/%d). Retrying in 10 seconds...",
                         attempt,
                         max_attempts,
                     )
                     import time
 
-                    time.sleep(2)
+                    time.sleep(10)
                 else:
                     raise err
 
         final_answer = response.text.strip() if response.text else ""
-        tools_called = [ToolCall(name=log["tool_name"]) for log in execution_log]
+        tools_called = [
+            ToolCall(name=log["tool_name"], input_parameters=log["args"]) for log in execution_log
+        ]
 
         return {
             "prompt": user_prompt,

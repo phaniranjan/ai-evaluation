@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 # Load golden test cases for pytest parameterization
 _selection_cases = load_golden_cases(
-    "agent_trajectory.json", domain="agents", prefix_filter="agent_tool_selection"
+    "agent_evaluation.json", domain="agents", prefix_filter="agent_tool_selection"
 )
 
 
