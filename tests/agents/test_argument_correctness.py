@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 # Load golden argument correctness test cases for pytest parameterization
 _argument_cases = load_golden_cases(
-    "agent_trajectory.json", domain="agents", prefix_filter="agent_argument"
+    "agent_evaluation.json", domain="agents", prefix_filter="agent_argument"
 )
 
 

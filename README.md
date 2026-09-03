@@ -14,7 +14,7 @@ ai_evaluation/
 │   ├── core/single_turn.json             # Core Q&A Golden Cases
 │   ├── rag/rag_pipeline.json             # RAG Ground-Truth Contexts & Answers
 │   ├── security/prompt_injection.json    # Security Injection Payloads
-│   └── agents/agent_trajectory.json      # Agent Trajectory Expectations
+│   └── agents/agent_evaluation.json      # Agent Evaluation Golden Cases
 │
 ├── src/ai_evaluation/                    # System Under Test (SUT) Implementations
 │   ├── agents/minimal_agent.py           # Gemini Multi-Tool Sequential Agent SUT
