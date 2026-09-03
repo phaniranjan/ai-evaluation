@@ -216,7 +216,9 @@ class MinimalAgent:
                     raise err
 
         final_answer = response.text.strip() if response.text else ""
-        tools_called = [ToolCall(name=log["tool_name"]) for log in execution_log]
+        tools_called = [
+            ToolCall(name=log["tool_name"], input_parameters=log["args"]) for log in execution_log
+        ]
 
         return {
             "prompt": user_prompt,
