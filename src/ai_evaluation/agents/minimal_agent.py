@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 
 def get_weather(location: str) -> str:
     """Get the current weather and temperature for a specified location."""
+    if "retry" in location.lower() or "error" in location.lower():
+        return f"Error 500: Temporary database connection timeout for location '{location}'. Please call get_weather again to retry."
     return f"The current temperature in {location} is 25°C with sunny skies."
 
 
