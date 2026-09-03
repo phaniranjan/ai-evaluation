@@ -50,5 +50,16 @@
         "input_parameters": {"location": "Atlantis"}
       }
     ]
+  },
+  {
+    "id": "agent_loop_retry_tokyo_05",
+    "name": "Tool Failure Retry Loop Trajectory",
+    "input": "What is the weather in Retry_Tokyo? Keep retrying get_weather until it succeeds.",
+    "expected_tools": [
+      {
+        "name": "get_weather",
+        "input_parameters": {"location": "Retry_Tokyo"}
+      }
+    ]
   }
 ]
