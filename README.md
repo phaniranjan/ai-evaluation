@@ -1,107 +1,128 @@
-# AI Evaluation Tests
+# AI Evaluation Framework
 
-A small DeepEval test suite that generates LLM responses with Google Gemini and
-evaluates them with a separate judge model. Ollama is the default judge, and
-Groq-hosted Llama is available as a cloud-based alternative. The repository
-includes a single-turn correctness test and a multi-turn professionalism test.
+An end-to-end evaluation harness for LLMs, RAG pipelines, Security Guardrails, and Autonomous AI Agents using **DeepEval**, **Google Gemini**, and judge models (**Ollama** locally or **Groq** in the cloud).
 
-## Requirements
+---
 
-- Python 3.10 or newer
-- A Google Gemini API key
-- Either [Ollama](https://ollama.com/) running locally, or a [Groq](https://groq.com/) API key for Llama
+## 🏗️ Architecture & Capability Domains
 
-## Setup
+The framework organizes evaluation tests into **4 capability domains** under `tests/` driven by pure ground-truth Golden Datasets in `data/`:
 
-Create and activate a virtual environment, then install the dependencies:
+```
+ai_evaluation/
+├── data/                                 # Standardized Golden Datasets
+│   ├── core/single_turn.json             # Core Q&A Golden Cases
+│   ├── rag/rag_pipeline.json             # RAG Ground-Truth Contexts & Answers
+│   ├── security/prompt_injection.json    # Security Injection Payloads
+│   └── agents/agent_trajectory.json      # Agent Trajectory Expectations
+│
+├── src/ai_evaluation/                    # System Under Test (SUT) Implementations
+│   ├── agents/minimal_agent.py           # Gemini Multi-Tool Sequential Agent SUT
+│   ├── rag_pipeline.py                   # RAG Pipeline SUT
+│   ├── rag_retriever.py                  # BM25 Retriever SUT
+│   └── llm_generator.py                  # Core LLM Response Generator SUT
+│
+└── tests/                                # Evaluation Test Suites
+    ├── core/                             # Domain 1: Core Q&A & Summarization
+    │   ├── test_single_turn.py           # Correctness & Relevancy Quality
+    │   └── test_summarization.py         # Summary Alignment & Truthfulness
+    ├── rag/                              # Domain 2: RAG Pipeline
+    │   └── test_rag_pipeline.py          # Faithfulness & Contextual Recall
+    ├── security/                         # Domain 3: Security & Guardrails
+    │   ├── test_security_evaluation.py   # Prompt Injection Safety
+    │   └── test_safety.py                # Toxicity & Bias Guardrails
+    └── agents/                           # Domain 4: Autonomous Agent Evaluation
+        ├── test_tool_selection.py        # Single-Tool Selection Fit
+        ├── test_tool_trajectory.py       # Sequential Ordering & Task Completion
+        ├── test_tool_step_efficiency.py  # Step Efficiency & Redundancy
+        ├── test_agent_loop_detection.py  # Real SUT Infinite Loop Detection
+        └── *_metric_validation.py        # Controlled Evaluator Defect Suites
+```
 
+---
+
+## 🔬 Evaluation Methodology
+
+The framework uses a **Dual-Layer Evaluation Methodology**:
+
+1. **Evaluator Validation Suites (`*_metric_validation.py`)**:
+   - Controlled synthetic defect injection tests that verify the judge metric itself (e.g. proving `ToolCorrectnessMetric` flags wrong tools or out-of-order calls, `TaskCompletionMetric` flags incomplete tasks or hallucinations after tool errors, and `AgentLoopDetectionMetric` flags infinite retries).
+2. **Real SUT Golden Dataset Suites**:
+   - Live execution tests of the actual SUT (e.g. `MinimalAgent`) parameterized dynamically via `load_golden_cases` from `data/`.
+
+---
+
+## 📊 Agent Evaluation Matrix
+
+```
+                             Agent Evaluation
+                                    │
+       ┌────────────────────────────┴────────────────────────────┐
+       │                                                         │
+Process Evaluation                                       Outcome & Resilience
+       │                                                         │
+ ├── Tool Selection (ToolCorrectnessMetric)                ├── Task Completion (TaskCompletionMetric)
+ ├── Trajectory Ordering (ToolCorrectnessMetric)           └── Loop & Error Recovery (AgentLoopDetectionMetric)
+ └── Step Efficiency (StepEfficiencyMetric)
+```
+
+---
+
+## 🚀 Setup & Requirements
+
+### Requirements
+- Python 3.10+
+- A Google Gemini API key (`GEMINI_API_KEY`)
+- Either [Ollama](https://ollama.com/) running locally or a [Groq](https://groq.com/) API key
+
+### 1. Environment Setup
 ```bash
 python -m venv deepeval_venv
 source deepeval_venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Set the Gemini API key in the current shell:
+### 2. Configuration (`.env`)
+Create a `.env` file in the project root:
+```ini
+EVALUATION_JUDGE=groq
+GROQ_EVALUATION_MODEL=qwen/qwen3.8-27b
+GEMINI_API_KEY="your-gemini-api-key"
+GROQ_API_KEY="your-groq-api-key"
 
-```bash
-export GEMINI_API_KEY="your-gemini-api-key"
+# Telemetry Opt-Out (Disables telemetry noise & shutdown delays)
+DEEPEVAL_TELEMETRY_OPT_OUT=YES
+POSTHOG_DISABLED=1
 ```
 
-Download the local judge model and leave the Ollama service running:
+---
+
+## 🧪 Running Evaluation Tests
+
+### Run Domain-Specific Test Suites
 
 ```bash
-ollama pull qwen2.5:7b
-ollama serve
+# Domain 1: Core Quality & Summarization
+./deepeval_venv/bin/pytest -v tests/core/
+
+# Domain 2: RAG Pipeline
+./deepeval_venv/bin/pytest -v tests/rag/
+
+# Domain 3: Security & Safety Guardrails
+./deepeval_venv/bin/pytest -v tests/security/
+
+# Domain 4: Autonomous Agent Evaluation Suite
+./deepeval_venv/bin/pytest -v tests/agents/
 ```
 
-The judge defaults to `qwen2.5:7b`. Override it, or point tests at a remote
-Ollama service, with:
-
+### Run Full Test Suite
 ```bash
-export OLLAMA_EVALUATION_MODEL="qwen2.5:7b"
-export OLLAMA_BASE_URL="http://localhost:11434"
+./deepeval_venv/bin/pytest -v tests/
 ```
 
-### Use Groq Llama as the judge
+---
 
-Set the Groq API key and select Groq before running the tests:
+## 🛠️ Project Configuration & Fixtures
 
-```bash
-export GROQ_API_KEY="your-groq-api-key"
-export EVALUATION_JUDGE="groq"
-export GROQ_EVALUATION_MODEL="qwen/qwen3.6-27b"
-```
-
-`EVALUATION_JUDGE` defaults to `ollama`, so no changes are required for the
-existing local setup. Set it to `groq` to use Llama 3.3 70B on Groq instead.
-
-You can also load variables from a local `.env` file:
-
-```bash
-set -a; source .env; set +a
-```
-
-Keep `.env` and `.env.local` out of Git. They are ignored by `.gitignore`.
-
-## Run Tests
-
-Run the single-turn response quality tests (evaluating correctness and answer relevancy):
-
-```bash
-./deepeval_venv/bin/pytest -q tests/static/test_single_turn.py
-./deepeval_venv/bin/pytest -q tests/dynamic/test_single_turn_dynamic.py
-```
-
-Run the multi-turn conversational quality tests:
-
-```bash
-./deepeval_venv/bin/pytest -q tests/static/test_multi_turn.py
-./deepeval_venv/bin/pytest -q tests/dynamic/test_multi_turn_dynamic.py
-```
-
-Run the summarization evaluation tests:
-
-```bash
-./deepeval_venv/bin/pytest -q tests/static/test_summarization.py
-./deepeval_venv/bin/pytest -q tests/dynamic/test_summarization_dynamic.py
-```
-
-Run the safety and guardrails evaluation tests (bias and toxicity):
-
-```bash
-./deepeval_venv/bin/pytest -q tests/static/test_safety.py
-./deepeval_venv/bin/pytest -q tests/dynamic/test_safety_dynamic.py
-```
-
-DeepEval does not allow `LLMTestCase` and `ConversationalTestCase` to be evaluated in the same test run, so run these modules as separate pytest commands.
-
-## Project Files
-
-- `conftest.py` - Shared judge-model fixture (Ollama or Groq); Gemini remains the response generator.
-- `test_data/` - JSON data used by the evaluation tests.
-- `test_single_turn.py` / `test_single_turn_dynamic.py` - Evaluates single-turn LLM responses for correctness (`GEval`) and answer relevancy (`AnswerRelevancyMetric`).
-- `test_multi_turn.py` / `test_multi_turn_dynamic.py` - Evaluates multi-turn conversations using `ConversationalGEval`.
-- `test_summarization.py` / `test_summarization_dynamic.py` - Evaluates document summaries for keypoint alignment and truthfulness using `SummarizationMetric`.
-- `test_safety.py` / `test_safety_dynamic.py` - Stress-tests model safety against biased and toxic content using `BiasMetric` and `ToxicityMetric`.
-- `requirements.txt` - Python dependencies.
-- `.gitignore` - Excludes environment files, virtual environments, and test caches.
+- `tests/conftest.py`: Shared judge fixtures (`ollama_judge_model`, `groq_judge_model`, `judge_model`), dataset loader (`load_golden_cases`), and telemetry setup.
+- `pyproject.toml`: Pytest configuration (`testpaths = ["tests"]`, `norecursedirs = ["tests/static", "deepeval_venv", ".git"]`).
